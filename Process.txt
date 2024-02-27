@@ -1,0 +1,66 @@
+_________________________________ FICHIERS DE CODE : ________________________________
+
+* bloomberg.py -> importation de toute les données depuis bloomberg 
+* signal.py -> selection des stocks 
+* optimisation.py -> replication du modèle décrit dans l'article 
+* performance.py -> calcul de tous les ratios, constuctions de graphs, ... 
+* main.py -> pour le run avec entrée des inputs 
+* export.py -> pour exporter le portefeuille dans le module PORT de bloomberg 
+
+
+
+____________________________________ FONCTIONS : ____________________________________
+
+bloomberg.py : 
+
+-> inputs : indice, dates (& fréquence), field bloom, 
+-> output : données dans un/des Dataframe(s) (compo, px_last, PE, ...) 
+
+* bds : import des compositions 
+* bdh : import des données historiques 
+* ?? 
+
+signal.py : 
+
+-> inputs : données (dans un dataframe ?), période & compo
+-> outputs : données classées selon la méthode choisie 
+
+* tri des données (une fonction par méthode = ptf R et V ?) 
+
+optimisation.py : 
+
+-> inputs : données classées (dans un dataframe)
+-> outputs : composition des portefeuilles (liste tickers ?) 
+
+* création des portefeuilles
+* pondération des stocks (avec plusieurs méthodes : équipondérée, 1/vol, 1/x) 
+
+??? notion d'optimisation -> il nous faut une valeur sur quoi optimiser les pondérations, ducoup comment on fait la diff avec la classe signal ?? 
+OU ALORS -> appel de la classe performance pour comparer les différents portefeuilles ? 
+
+performance.py : 
+
+- inputs : composition d'un portefeuille + full data + periodes 
+- outputs : résultats des tests 
+
+* test sur la significativité des résultats (t-stat) 
+* calcul de la tracking error 
+* calcul du ratio de sharpe 
+* calcul de la Value at Risk 
+* graphique des performances cumulées (track) 
+* graphique des performances des portefeuilles 
+
+main.py : 
+
+* ... 
+
+export.py : 
+
+-> inputs : compo des portefeuilles (tickers + pondérations) 
+
+* exportation du portefeuille vers bloom 
+
+
+
+
+
