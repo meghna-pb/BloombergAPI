@@ -1,0 +1,28 @@
+IMPORTATION DES DONNEES (bloomberg.py) : 
+
+- Test Import avec fonction BDS -> salle bloom 
+- Enregistrement des données (dataframe to excel ?) -> salle bloom
+- Ajustement de la fonctions pour les inputs 
+
+
+CLASSEMENT DES DONNEES (signal.py) : 
+
+- Retraitement initial des entreprises non éligibles ? 
+- Calcul des rendements 
+- Classement -> rendements passés + volume de transaction passées 
+
+
+CONSTRUCTION DES PORTEFEUILLES (optimisation.py) : 
+
+- Selection des portefeuilles selon les listes triées + les inputs (nb ptf) 
+- Appels de la classe optimisation pour choisir les pondérations 
+
+
+TEST DE PERFORMANCE (performance.py) :
+
+- Calcul de la tracking error 
+- Calcul du ratio de sharpe 
+- Calcul de la Value at Risk 
+- Calcul des performances 
+- Graphiques des performances (+ perf cumulées) 
+- Calcul de la t-stat pour tous les résultats  
