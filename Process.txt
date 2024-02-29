@@ -21,7 +21,7 @@ bloomberg.py :
 * ?? 
 
 signal.py : 
-
+Construction de la croisée des portefeuilles R et V
 -> inputs : données (dans un dataframe ?), période & compo
 -> outputs : données classées selon la méthode choisie 
 
