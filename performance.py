@@ -73,4 +73,4 @@ class Performance:
 
     def t_stat(self):
         portfolio_returns = self.portfolio_returns()
-        return stats.ttest_1samp(portfolio_returns, 0)
+        return stats.ttest_1samp(portfolio_returns, 0) # à coder pour de vrai 
