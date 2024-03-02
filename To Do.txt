@@ -18,7 +18,7 @@ CONSTRUCTION DES PORTEFEUILLES (optimisation.py) :
 - Appels de la classe optimisation pour choisir les pondérations 
 
 
-TEST DE PERFORMANCE (performance.py) :
+TEST DE PERFORMANCE (performance.py) : --> il faut faire test !!!
 
 - Calcul de la tracking error 
 - Calcul du ratio de sharpe 
