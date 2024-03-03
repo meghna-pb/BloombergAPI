@@ -15,8 +15,8 @@ from scipy import stats
 class Performance:
     def __init__(self, bench, portfolio, risk_free_rate=0.02):
         """
-        :param bench: DataFrame with benchmark data, including columns ['date', 'ticker', 'PX_LAST']
-        :param portfolio: DataFrame with portfolio data, including columns ['date', 'ticker', 'weight', 'PX_LAST']
+        :param bench: DataFrame with benchmark data, including columns ['ticker', 'PX_LAST']
+        :param portfolio: DataFrame with portfolio data, including columns [ 'ticker', 'weight', 'PX_LAST']
         :param risk_free_rate: Risk-free rate, default is 2%
         """
         self.bench = bench
@@ -32,12 +32,23 @@ class Performance:
         else:
             data = self.portfolio
         
-        data_agg = data.groupby(['date', 'ticker']).agg({'weight': 'sum'}).reset_index() # dans l'éventualité où on a 2x le meme ticker à une date
-        data_agg['returns'] = data_agg['PX_LAST'].pct_change().dropna() # monthly returns
-        weighted_returns = data_agg['returns'].multiply(data_agg.set_index(['date', 'ticker'])['weight'], axis=0)
-        final_returns = weighted_returns.groupby(level='date').sum()
-        
-        return final_returns
+        #data_agg = data.groupby(level=0).agg({'weight': 'sum'}).reset_index() # dans l'éventualité où on a 2x le meme ticker à une date (on a pas encore les poids donc cette ligne est inutile)
+        # data['returns'] = data['PX_LAST'].pct_change().dropna() # monthly returns
+        # weighted_returns = data_agg['returns'].multiply(data_agg.set_index(['ticker'])['weight'], axis=0)
+        # final_returns = weighted_returns.groupby(level='date').sum()
+            
+        #version 03/03 Meghna
+        returns_dict = {}
+        prev_df = None
+        for date, df in data.items():
+            if prev_df is not None:
+                merged_df = pd.merge(df, prev_df, how='inner', left_index=True, right_index=True, suffixes=('', '_prev'))
+                merged_df['returns'] = (merged_df['PX_LAST'] / merged_df['PX_LAST_prev']) - 1
+                merged_df = merged_df.dropna(subset=['returns'])
+                returns_dict[date] = merged_df
+            prev_df = df
+
+        return returns_dict
     
     def tracking_error(self):
         bench_returns = self.weighted_returns(bench=True)
