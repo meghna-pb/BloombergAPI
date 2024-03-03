@@ -16,12 +16,13 @@ class Performance:
     def __init__(self, bench, portfolio, risk_free_rate=0.02):
         """
         :param bench: DataFrame with benchmark data, including columns ['ticker', 'PX_LAST']
-        :param portfolio: DataFrame with portfolio data, including columns [ 'ticker', 'weight', 'PX_LAST']
+        :param portfolio: DataFrame with portfolio data, including columns ['ticker', 'weight', 'PX_LAST']
         :param risk_free_rate: Risk-free rate, default is 2%
         """
         self.bench = bench
         self.portfolio = portfolio
         self.risk_free_rate = risk_free_rate
+        # C'est quoi le bench c'est quoi le portfolio ici ? 
 
     def calculate_returns(self, bench=False):
         """
@@ -32,12 +33,12 @@ class Performance:
         else:
             data = self.portfolio
         
-        #data_agg = data.groupby(level=0).agg({'weight': 'sum'}).reset_index() # dans l'éventualité où on a 2x le meme ticker à une date (on a pas encore les poids donc cette ligne est inutile)
+        # data_agg = data.groupby(level=0).agg({'weight': 'sum'}).reset_index() # dans l'éventualité où on a 2x le meme ticker à une date (on a pas encore les poids donc cette ligne est inutile)
         # data['returns'] = data['PX_LAST'].pct_change().dropna() # monthly returns
         # weighted_returns = data_agg['returns'].multiply(data_agg.set_index(['ticker'])['weight'], axis=0)
         # final_returns = weighted_returns.groupby(level='date').sum()
             
-        #version 03/03 Meghna
+        # version 03/03 Meghna
         returns_dict = {}
         prev_df = None
         for date, df in data.items():
@@ -48,6 +49,10 @@ class Performance:
                 returns_dict[date] = merged_df
             prev_df = df
 
+        # Je comprends pas pourquoi tu calcules les rendements dans cette classe ? 
+        # Pour moi on devrait y mettre que les fonctions de calcul des mesures de perf ? (donc toute les fonctions suivantes)
+        # Juste la en argument de la classe on donne les rendements à la place du px_last ? 
+        # -> Ducoup rendement calculés dans la classe signal ? 
         return returns_dict
     
     def tracking_error(self):

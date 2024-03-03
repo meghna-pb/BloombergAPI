@@ -18,6 +18,9 @@ class Signal:
         self.exclu = exclu
         portfolio['eligible'] = ~portfolio['ticker'].isin(exclu['FD167']) & ~portfolio['ticker'].isin(exclu['DY992']) #for open ended funds and ADR
         self.performance = Performance(bench, portfolio, risk_free_rate)
+        
+        # Pour les exclusions, si on veut pouvoir adapter le code à d'autres indice il faudrait pas les mettre la 
+        # C'est mieux de les forcer dans le fichier data ? (au moins pour toute les exclusions initiales ?)
 
 
     def create_portfolios(self, n_returns, m_volume):
@@ -30,8 +33,8 @@ class Signal:
         portfolios = {'returns': {}, VOLUME: {}}
 
         # Filter eligible data
-        eligible_data = self.performance.portfolio[self.performance.portfolio['eligible']]
-        eligible_data= self.performance.calculate_returns()
+        eligible_data = self.performance.portfolio[self.performance.portfolio['eligible']] ### ???
+        eligible_data= self.performance.calculate_returns() 
 
         # For each date, create the portfolios
         for date in eligible_data[DATE].unique():
@@ -48,3 +51,8 @@ class Signal:
             portfolios[VOLUME][date] = [sorted_by_volume.iloc[i::m_volume] for i in range(min(m_volume, len(sorted_by_volume)))]
 
         return portfolios
+    
+        # C'est mieux une fonction qui créée le portefeuille pour toute les dates 
+        # ou une fonction ou tu donnes la date et qui créé le portefeuille ? 
+        # pour ne pas être obligé de le faire pour chaque date du df, splitter plus facilement en plus petites periodes 
+        # et pour acceder plus facilement aux portefeuilles pour un seul mois ? 

@@ -9,10 +9,11 @@ def reading_df(path, sheet_name):
     df.columns = df.columns.str.replace(" Equity", "").str.replace(" EQUITY", "")
     df = df.T
     df.columns = pd.to_datetime(df.columns, format='%Y%m%d')
+    ## Pourquoi mettre les dates en colonnes ?
     return df
 
-px_last_df = reading_df('Data/PX_LAST_VOLUME 2.xlsm', sheet_name='PX_LAST')
-px_volume_df = reading_df('Data/PX_LAST_VOLUME 2.xlsm', sheet_name='PX_VOLUME')
+px_last_df = reading_df('Data/PX_Last_Volume.xlsm', sheet_name='PX_LAST')
+px_volume_df = reading_df('Data/PX_Last_Volume.xlsm', sheet_name='PX_VOLUME')
 
 result_dict = {}
 
@@ -31,6 +32,8 @@ for date in px_last_df.columns:
     merged_df = pd.concat([px_last_aligned, px_volume_aligned], axis=1)
 
     result_dict[nearest_date_px_last] = merged_df
+    
+    # Pourquoi merge Px_last et px_volume ????????????????????????????
 
 
 
