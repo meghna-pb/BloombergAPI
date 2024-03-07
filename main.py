@@ -8,4 +8,6 @@ perf = Performance(result_dict, result_dict)
 
 
 test = perf.calculate_returns()
-print(test)
+print(test[nearest_date_px_last])
+
+print("Hola :)<3")
