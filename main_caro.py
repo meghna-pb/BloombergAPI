@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from bloomberg_caro import df_PX_LAST, df_PX_VOLUME
+from bloomberg import df_PX_LAST, df_PX_VOLUME
 from signal_caro import Signal
 
 print(df_PX_LAST)
