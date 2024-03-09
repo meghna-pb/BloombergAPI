@@ -1,13 +1,21 @@
-from signal_1 import Signal
-from performance import Performance
-from data import result_dict,nearest_date_px_last
+import pandas as pd
+from data import Data
+import matplotlib.pyplot as plt
 
 
-
-perf = Performance(result_dict, result_dict)
-
-
-test = perf.calculate_returns()
-print(test[nearest_date_px_last])
-
-print("Hola :)<3")
+data = Data("Data")
+result = data.calculate_returns()
+# for date, df in result.items():
+#     print(f"For date: {date}")
+#     print(df)
+    
+concatenated_df = pd.concat(data.result_dict.values(), axis=0)
+grouped_df = concatenated_df.loc['returns']
+plt.figure(figsize=(10, 6))
+grouped_df.plot(kind='line')
+plt.title('Returns for Each Ticker Across Dates')
+plt.xlabel('Date')
+plt.ylabel('Returns')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
