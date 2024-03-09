@@ -1,5 +1,4 @@
 import pandas as pd
-from signal_caro import Signal # Why ?? 
 
 # Remarque Caro : j'ai changé le nom des variables (name_type ->>> type_name)
 # Juste pour plaire à Celia, elle avait dit qu'elle aimait ca comme ca et si ca peut lui faire plaisir on va pas cracher dessus... 
@@ -10,10 +9,8 @@ class Data:
         self.df_compo.columns = pd.to_datetime(self.df_compo.columns, format='%Y%m%d')
         self.df_px_last = self.__reading_df(path+'/PX_Last_Volume.xlsm', sheet_name='PX_LAST')
         self.df_px_volume = self.__reading_df(path+'/PX_Last_Volume.xlsm', sheet_name='PX_VOLUME')
-        ##
         self.df_returns = self.__calculate_returns()
         self.df_exclusion = pd.DataFrame() # quand on aura le DF avec les titres à exclure
-        # self.dict_results = self.__align_data() # {}
 
     def __reading_df(self, path, sheet_name, US=False):
         df = pd.read_excel(path, sheet_name=sheet_name, index_col=0)
@@ -37,9 +34,8 @@ class Data:
         data = {}
         for date in self.df_px_last.index:
             if date == self.df_px_last.index[0]:continue
-            #nearest_date_px_last = min(self.df_compo.columns, key=lambda x: abs(x - date)) 
-            #nearest_date_px_volume = nearest_date_px_last  # Using the same nearest date for px_volume_df
-            # Pourquoi créer deux variables si c'est les mêmes ? 
+            # gestion du décalage pour le df des rendements (pas la première date)
+            
             nearest_date = min(self.df_compo.columns, key=lambda x: abs(x - date)) 
 
             px_last_aligned = self.df_px_last.loc[[date]].rename(index={date: nearest_date})
@@ -55,6 +51,7 @@ class Data:
             merged_df = pd.concat([px_last_aligned, px_volume_aligned, returns_aligned])
             data[nearest_date] = merged_df
         return data
+    
     
     def __calculate_returns (self) -> pd.DataFrame : 
         """
