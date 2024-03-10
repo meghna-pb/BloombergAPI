@@ -28,6 +28,9 @@ data = Data("Data").get_data()
 
 
 sig = Signal(data)
-test, exemple_date = sig.create_portfolios(2,2)
+test, exemple_date = sig.create_portfolios(3,2)
 print(test[exemple_date])
-# Pas tout compris mais ca m'a l'air pas mal du tout 
+#print(test[exemple_date]["RETURNS"][0])
+
+# Je comprends vraiment rien a comment c'est construit 
+
