@@ -48,7 +48,7 @@ class Data:
             px_volume_aligned = px_volume_aligned.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: "PX_VOLUME"})
             returns_aligned = returns_aligned.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: "RETURNS"})
 
-            merged_df = pd.concat([px_last_aligned, px_volume_aligned, returns_aligned])
+            merged_df = pd.concat([px_last_aligned, px_volume_aligned, returns_aligned]).T
             data[nearest_date] = merged_df
         return data
     

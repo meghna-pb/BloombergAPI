@@ -10,7 +10,6 @@ from signal_1 import Signal
 
 
 data = Data("Data").get_data()
-
 #for date, df in data.items():
 #    print(f"For date: {date}")
 #    print(df)
