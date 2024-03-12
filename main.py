@@ -4,10 +4,6 @@ import matplotlib.pyplot as plt
 from data import Data
 from signal_1 import Signal
 
-# J'ai fait pas mal de modif dans la classe data pour integrer un peu ce que j'avais fait ce matin 
-# La sortie est exactement la même + j'ai testé le graphiques, j'ai exactement les mêmes résultats
-# Je t'ai laissé ta version dans le folder archives si tu préfères
-
 
 data = Data("Data").get_data()
 #for date, df in data.items():
@@ -27,9 +23,18 @@ data = Data("Data").get_data()
 
 
 sig = Signal(data)
-test, exemple_date = sig.create_portfolios(3,2)
-print(test[exemple_date])
-#print(test[exemple_date]["RETURNS"][0])
 
-# Je comprends vraiment rien a comment c'est construit 
+### Les lignes en com ici vont plus fonctionner avec ma nouvelle version de create_portfolio
+
+# test, exemple_date = sig.create_portfolios(3,2)
+# print(test[exemple_date])
+# print(type(test[exemple_date]["RETURNS_1"]))
+
+# dict_returns, dict_volume, exemple_date = sig.create_portfolios(3,2)
+#print(dict_returns[exemple_date]["R1"])
+
+intersec, exemple_date = sig.create_intersections(3, 2)
+print(intersec[exemple_date])
+
+
 

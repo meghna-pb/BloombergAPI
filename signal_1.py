@@ -16,70 +16,102 @@ class Signal:
         """
         self.data = data
         # self.performance = Performance(bench, portfolio, risk_free_rate)
-        self.portfolios = {}
+        self.dict_returns = {}
+        self.dict_volume = {}
+        self.dict_portfolios = {}
         
-
-    # def create_portfolios(self, n_returns, m_volume):
-    #     """
-    #     Creates n return portfolios and m volume portfolios for each date 
-    #     :param n_returns: Number of return portfolios to create for each date.
-    #     :param m_volume: Number of volume portfolios to create for each date.
-    #     :return: A dictionary containing the return and volume portfolios for each date.
-    #     """
-    #     for date, date_data in self.data.items():            
-    #         self.portfolios[date] = {}
-    #         sorted_by_returns = date_data.sort_values(by='RETURNS', axis=1, ascending=False)
-    #         sorted_by_volume = date_data.sort_values(by=VOLUME, axis=1, ascending=False)
-
-    #         # Create return portfolios for this date
-    #         self.portfolios[date]['RETURNS'] = [sorted_by_returns.iloc[i::n_returns] for i in range(min(n_returns, len(sorted_by_returns)))]
-    #         # Pb 1 : "range(min(n_returns, len(sorted_by_returns)))" -> n_returns c'est le nombre de ptf pas de tickers dans un ptf non ?? 
-    #         # Pb 2 : ".iloc[i::n_returns]" -> toujours la même compo 
-            
-    #         # Create volume portfolios for this date
-    #         self.portfolios[date][VOLUME] = [sorted_by_volume.iloc[i::m_volume] for i in range(min(m_volume, len(sorted_by_volume)))]
-
-    #     return self.portfolios, date # J'ai rajouté date juste pour pouvoir tester :) 
     
-    def create_portfolios(self, n_returns, m_volume):
+    #def create_portfolios(self, n_returns, m_volume):
         """
         Creates n return portfolios and m volume portfolios for each date 
         :param n_returns: Number of return portfolios to create for each date.
         :param m_volume: Number of volume portfolios to create for each date.
         :return: A dictionary containing the return and volume portfolios for each date.
         """
-        for date, date_data in self.data.items():    
-            date_data = date_data.dropna(subset=['PX_LAST', VOLUME], how="all")        
-            self.portfolios[date] = {}
-            sorted_by_returns = date_data.sort_values(by='RETURNS', ascending=False) #axis=1, 
-            sorted_by_volume = date_data.sort_values(by=VOLUME, ascending=False)    #axis=1, 
+        
+        #for date, date_data in self.data.items():    
+        #    date_data = date_data.dropna(subset=['PX_LAST', VOLUME], how="all")        
+        #    #self.dict_portfolios[date] = {}
+        #    self.dict_returns[date] = {}
+        #    self.dict_volume[date] = {}
+        #    sorted_by_returns = date_data.sort_values(by='RETURNS', ascending=False) #axis=1, 
+        #    sorted_by_volume = date_data.sort_values(by=VOLUME, ascending=False)     #axis=1, 
 
-            # Create return portfolios for this date
-            for i in range(min(n_returns, len(sorted_by_returns))):
-                start_idx = i * len(sorted_by_returns) // min(n_returns, len(sorted_by_returns))
-                end_idx = (i + 1) * len(sorted_by_returns) // min(n_returns, len(sorted_by_returns))
-                self.portfolios[date][f'RETURNS_{i+1}'] = sorted_by_returns.iloc[start_idx:end_idx]
+        #    # Create return portfolios for this date
+        #    for i in range(min(n_returns, len(sorted_by_returns))):
+        #        start_idx = i * len(sorted_by_returns) // min(n_returns, len(sorted_by_returns))
+        #        end_idx = (i + 1) * len(sorted_by_returns) // min(n_returns, len(sorted_by_returns))
+        #        #self.dict_portfolios[date][f'RETURNS_{i+1}'] = sorted_by_returns.iloc[start_idx:end_idx]
+        #        self.dict_returns[date][f'R{i+1}'] = sorted_by_returns.iloc[start_idx:end_idx]
 
-            # Create volume portfolios for this date
-            for i in range(min(m_volume, len(sorted_by_volume))):
-                start_idx = i * len(sorted_by_volume) // min(m_volume, len(sorted_by_volume))
-                end_idx = (i + 1) * len(sorted_by_volume) // min(m_volume, len(sorted_by_volume))
-                self.portfolios[date][f'VOLUME_{i+1}'] = sorted_by_volume.iloc[start_idx:end_idx]
+        #    # Create volume portfolios for this date
+        #    for i in range(min(m_volume, len(sorted_by_volume))):
+        #        start_idx = i * len(sorted_by_volume) // min(m_volume, len(sorted_by_volume))
+        #        end_idx = (i + 1) * len(sorted_by_volume) // min(m_volume, len(sorted_by_volume))
+        #        #self.dict_portfolios[date][f'VOLUME_{i+1}'] = sorted_by_volume.iloc[start_idx:end_idx]
+        #        self.dict_volume[date][f'V{i+1}'] = sorted_by_volume.iloc[start_idx:end_idx]
 
-        return self.portfolios, date
+        # return self.dict_returns, self.dict_volume, date
+        # return self.dict_portfolios, date
+
+
+    def create_portfolios(self, data, n_returns:int, m_volume:int):
         """
-        Ok je comprends rien : 
+        Creates n return portfolios and m volume portfolios for a given date 
+        :param data: DataFrame with data filtered for one date
+        :param n_returns: Number of return portfolios to create for each date.
+        :param m_volume: Number of volume portfolios to create for each date.
+        :return: A dictionary containing the return and volume portfolios for each date.
+        """  
+        returns_ptf, volume_ptf = {}, {}
+        sorted_by_returns = data.sort_values(by='RETURNS', ascending=False) 
+        sorted_by_volume = data.sort_values(by=VOLUME, ascending=False)    
+
+        # Create return portfolios for the given date 
+        for i in range(min(n_returns, len(sorted_by_returns))):
+            start_idx = i * len(sorted_by_returns) // min(n_returns, len(sorted_by_returns))
+            end_idx = (i + 1) * len(sorted_by_returns) // min(n_returns, len(sorted_by_returns))
+            returns_ptf[f'R{i+1}'] = sorted_by_returns.iloc[start_idx:end_idx]
+
+        # Create volume portfolios for the given date 
+        for i in range(min(m_volume, len(sorted_by_volume))):
+            start_idx = i * len(sorted_by_volume) // min(m_volume, len(sorted_by_volume))
+            end_idx = (i + 1) * len(sorted_by_volume) // min(m_volume, len(sorted_by_volume))
+            volume_ptf[f'V{i+1}'] = sorted_by_volume.iloc[start_idx:end_idx]
+
+        return returns_ptf, volume_ptf
+
+
+    def create_intersections(self, n_returns, m_volume):
+        """
+            Get intersections of return and volume portfolios for each date.
+        """
         
-        1) n_returns et m_volume c'est le nombre de portefeuilles que l'on veut non ? 
-        Dans le code la ca correspond à ca, mais aussi au nombre de tickers qu'on veut mettre dedans ? 
+        for date, date_data in self.data.items():    
+            date_data = date_data.dropna(subset=['PX_LAST', VOLUME], how="all")     
+            self.dict_portfolios[date] = {}
+            
+            self.dict_returns[date], self.dict_volume[date] = self.create_portfolios(date_data, n_returns, m_volume)
+
+            for R_i, R_portfolio in self.dict_returns[date].items():
+                for V_j, V_portfolio in self.dict_volume[date].items():                    
+                    intersection_index = R_portfolio.index.intersection(V_portfolio.index)
+                    intersection_portfolio = R_portfolio.loc[intersection_index]
+                    self.dict_portfolios[date][f'{R_i}_{V_j}'] = intersection_portfolio
+
+        return self.dict_portfolios, date
+
         
-        2) Si on demande 3 ptf par exemple, les 3 auront la même compo, il faut plutot prendre les suivants et ainsi de suite
-        
-        3) Il y a une couille sur les colonnes allouée à chaque ptf : 
-        Par ex si on demande 3 ptf, le 1er aura que la colonne PX_Last, le 2ème que PX_Volume et le 3ème que RETURNS 
-        On veut les 3 colonnes pour chaque ? 
-        
-        4) A mon avis il y a vraiment beaucoup trop de poupée russes, des dataframe dans des dict dans des dict dans des dict ... 
-        J'ai essayer de reflechir à comment simplifier mais vraiment je comprends pas ta logique et je veux pas niquer tout ce que t'as fait 
-        
+        """
+            PETIT RESUME DES MODIFS : 
+            
+            1) Une nouvelle classe create_portfolios : même principe mais que pour une seule date 
+            (je voulais éviter une double boucle for inutile dans le process)
+            
+            2) Deux nouvelles variables : dict_returns et dict_volume 
+            -> Pour l'intesection c'est plus facile de les séparer 
+            -> self.portfolios contient maintenant les portfeuilles après intersections
+            
+            3) Nouvelle fonction create_intesections : remplis le dict.portfolios
+            TOUT les ptf sont construits (je sais je me contredit toute seule), à voir si ca prend vraiment plus de temps ou pas
         """
