@@ -1,20 +1,25 @@
 IMPORTATION DES DONNEES (bloomberg.py) : 
 
 - Test Import avec fonction BDS -> salle bloom 
-- Enregistrement des données (dataframe to excel ?) -> salle bloom
++ Enregistrement des données (dataframe to excel ?) -> salle bloom
 - Ajustement de la fonctions pour les inputs 
+
+TRAITEMENT DES DONNEES (data.py) : 
++ Calcul des rendements 
++ Creation de dataframe 
+- Retraitement initial des entreprises non éligibles ? 
 
 
 CLASSEMENT DES DONNEES (signal.py) : 
 
-- Retraitement initial des entreprises non éligibles ? 
-- Calcul des rendements 
-- Classement -> rendements passés + volume de transaction passées 
++ Classement -> rendements passés + volume de transaction passées 
++ Creation des portefeuilles rendements et volume 
++ Creation des portefeuilles d'intersection 
 
 
 CONSTRUCTION DES PORTEFEUILLES (optimisation.py) : 
 
-- Selection des portefeuilles selon les listes triées + les inputs (nb ptf) 
+- Selection des poids pour chaque shares 
 - Appels de la classe optimisation pour choisir les pondérations 
 
 

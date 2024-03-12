@@ -24,36 +24,6 @@ class Performance:
         self.risk_free_rate = risk_free_rate
         # C'est quoi le bench c'est quoi le portfolio ici ? 
 
-    def calculate_returns(self, bench=False):
-        """
-         calculates returns.
-        """
-        if bench:
-            data = self.bench
-        else:
-            data = self.portfolio
-        
-        # data_agg = data.groupby(level=0).agg({'weight': 'sum'}).reset_index() # dans l'éventualité où on a 2x le meme ticker à une date (on a pas encore les poids donc cette ligne est inutile)
-        # data['returns'] = data['PX_LAST'].pct_change().dropna() # monthly returns
-        # weighted_returns = data_agg['returns'].multiply(data_agg.set_index(['ticker'])['weight'], axis=0)
-        # final_returns = weighted_returns.groupby(level='date').sum()
-            
-        # version 03/03 Meghna
-        returns_dict = {}
-        prev_df = None
-        for date, df in data.items():
-            if prev_df is not None:
-                merged_df = pd.merge(df, prev_df, how='inner', left_index=True, right_index=True, suffixes=('', '_prev'))
-                merged_df['returns'] = (merged_df['PX_LAST'] / merged_df['PX_LAST_prev']) - 1
-                merged_df = merged_df.dropna(subset=['returns'])
-                returns_dict[date] = merged_df
-            prev_df = df
-
-        # Je comprends pas pourquoi tu calcules les rendements dans cette classe ? 
-        # Pour moi on devrait y mettre que les fonctions de calcul des mesures de perf ? (donc toute les fonctions suivantes)
-        # Juste la en argument de la classe on donne les rendements à la place du px_last ? 
-        # -> Ducoup rendement calculés dans la classe signal ? 
-        return returns_dict
     
     def tracking_error(self):
         bench_returns = self.weighted_returns(bench=True)

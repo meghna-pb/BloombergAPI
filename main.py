@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 from data import Data
 from signal_1 import Signal
+import optimisation
 
 
 data = Data("Data").get_data()
@@ -24,17 +25,27 @@ data = Data("Data").get_data()
 
 sig = Signal(data)
 
-### Les lignes en com ici vont plus fonctionner avec ma nouvelle version de create_portfolio
-
+##############################
+### Les lignes en com ici ne vont plus fonctionner avec ma nouvelle version de create_portfolio
 # test, exemple_date = sig.create_portfolios(3,2)
 # print(test[exemple_date])
 # print(type(test[exemple_date]["RETURNS_1"]))
-
 # dict_returns, dict_volume, exemple_date = sig.create_portfolios(3,2)
 #print(dict_returns[exemple_date]["R1"])
+###############################
 
+###### Test intersection 
 intersec, exemple_date = sig.create_intersections(3, 2)
-print(intersec[exemple_date])
+#print(intersec[exemple_date])
+portfolio_test = intersec[exemple_date]["R1_V1"]
+print(portfolio_test)
 
+###### Test pondération equi : poids et rendements 
+#portfolio_test_2 = optimisation.get_equal_weighted(portfolio_test)
+#print(portfolio_test_2)
+#return_test = optimisation.get_date_returns(portfolio_test)
+#print(return_test)
 
-
+###### Test calcul rendements sur toute les périodes : (marche pas)
+#portfolio_test = intersec[exemple_date]
+#optimisation.get_full_returns(portfolio_test)
