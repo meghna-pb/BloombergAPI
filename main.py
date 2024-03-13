@@ -37,7 +37,7 @@ sig = Signal(data)
 ###### Test intersection 
 intersec, exemple_date = sig.create_intersections(3, 2)
 #print(intersec[exemple_date])
-portfolio_test = intersec[exemple_date]["R1_V1"]
+portfolio_test = intersec[exemple_date]
 print(portfolio_test)
 
 ###### Test pondération equi : poids et rendements 

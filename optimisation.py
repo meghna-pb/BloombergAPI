@@ -24,7 +24,10 @@ def get_date_returns(portfolio:pd.DataFrame) -> float :
     return portfolio['WEIGHTED_RETURNS'].sum()
 
 
-###### ne fonctionne pas, et je suis pas sure de ce que j'essaie de faire alors je m'arrete la 
+###### ne fonctionne pas, et je suis pas sure de ce que j'essaie de faire alors je m'arrete la --> on en reparle demain je comprends pas non plus ! 
+# parce qu'en soit si on a les rendements pondérés on a pas besoin de la fonction en dessous on met juste le nom du ptf et on trace non? à quoi sert cette fonction?
+
+
 def get_full_returns(portfolios:dict) :
     returns = {}
     for date, date_portfolios in portfolios.items(): 
