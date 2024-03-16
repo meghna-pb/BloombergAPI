@@ -7,36 +7,12 @@ import optimisation
 
 
 data = Data("Data").get_data()
-#for date, df in data.items():
-#    print(f"For date: {date}")
-#    print(df)
-    
-# concatenated_df = pd.concat(data.values(), axis=0)
-# grouped_df = concatenated_df.loc['RETURNS']
-# plt.figure(figsize=(10, 6))
-# grouped_df.plot(kind='line')
-# plt.title('Returns for Each Ticker Across Dates')
-# plt.xlabel('Date')
-# plt.ylabel('Returns')
-# plt.xticks(rotation=45)
-# plt.tight_layout()
-# plt.show()
-
 
 sig = Signal(data)
 
-##############################
-### Les lignes en com ici ne vont plus fonctionner avec ma nouvelle version de create_portfolio
-# test, exemple_date = sig.create_portfolios(3,2)
-# print(test[exemple_date])
-# print(type(test[exemple_date]["RETURNS_1"]))
-# dict_returns, dict_volume, exemple_date = sig.create_portfolios(3,2)
-#print(dict_returns[exemple_date]["R1"])
-###############################
 
-###### Test intersection 
+###### Test intersection ######
 intersec, exemple_date = sig.create_intersections(3, 2)
-#print(intersec[exemple_date])
 portfolio_test = intersec[exemple_date]
 print(portfolio_test)
 
@@ -47,5 +23,15 @@ print(portfolio_test)
 #print(return_test)
 
 ###### Test calcul rendements sur toute les périodes : (marche pas)
+# Tu peux tout modifier comme tu veux de tout facon pas sure qu'il y ait des trucs bon a garder 
 #portfolio_test = intersec[exemple_date]
 #optimisation.get_full_returns(portfolio_test)
+
+
+"""
+    TO DO : 
+    - Gerer la liste des exclusions 
+    - Essayer de comprendre la sortie bloom : même compo à chaque fois + données manquantes 
+    - Gerer les données manquantes 
+    - 
+"""

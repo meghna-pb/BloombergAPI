@@ -2,7 +2,7 @@ import pandas as pd
 from performance import Performance
 from data import Data
 
-DATE = "date" # maintenabilité du code + on ne sait pas comment la colonne s'appelle dans bloom
+DATE = "date" # on s'en sert jamais 
 VOLUME = "PX_VOLUME" # Pourquoi ? 
 
 class Signal:
@@ -20,40 +20,6 @@ class Signal:
         self.dict_volume = {}
         self.dict_portfolios = {}
         
-    
-    #def create_portfolios(self, n_returns, m_volume):
-        """
-        Creates n return portfolios and m volume portfolios for each date 
-        :param n_returns: Number of return portfolios to create for each date.
-        :param m_volume: Number of volume portfolios to create for each date.
-        :return: A dictionary containing the return and volume portfolios for each date.
-        """
-        
-        #for date, date_data in self.data.items():    
-        #    date_data = date_data.dropna(subset=['PX_LAST', VOLUME], how="all")        
-        #    #self.dict_portfolios[date] = {}
-        #    self.dict_returns[date] = {}
-        #    self.dict_volume[date] = {}
-        #    sorted_by_returns = date_data.sort_values(by='RETURNS', ascending=False) #axis=1, 
-        #    sorted_by_volume = date_data.sort_values(by=VOLUME, ascending=False)     #axis=1, 
-
-        #    # Create return portfolios for this date
-        #    for i in range(min(n_returns, len(sorted_by_returns))):
-        #        start_idx = i * len(sorted_by_returns) // min(n_returns, len(sorted_by_returns))
-        #        end_idx = (i + 1) * len(sorted_by_returns) // min(n_returns, len(sorted_by_returns))
-        #        #self.dict_portfolios[date][f'RETURNS_{i+1}'] = sorted_by_returns.iloc[start_idx:end_idx]
-        #        self.dict_returns[date][f'R{i+1}'] = sorted_by_returns.iloc[start_idx:end_idx]
-
-        #    # Create volume portfolios for this date
-        #    for i in range(min(m_volume, len(sorted_by_volume))):
-        #        start_idx = i * len(sorted_by_volume) // min(m_volume, len(sorted_by_volume))
-        #        end_idx = (i + 1) * len(sorted_by_volume) // min(m_volume, len(sorted_by_volume))
-        #        #self.dict_portfolios[date][f'VOLUME_{i+1}'] = sorted_by_volume.iloc[start_idx:end_idx]
-        #        self.dict_volume[date][f'V{i+1}'] = sorted_by_volume.iloc[start_idx:end_idx]
-
-        # return self.dict_returns, self.dict_volume, date
-        # return self.dict_portfolios, date
-
 
     def create_portfolios(self, data, n_returns:int, m_volume:int):
         """

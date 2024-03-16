@@ -1,10 +1,9 @@
-import blpapi
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 
-# A installer sur les ordi bloom : 
-## python -m pip install --index-url=https://bcms.bloomberg.com/pip/simple blpapi
+import blpapi
+# A installer sur les ordi bloom : python -m pip install --index-url=https://bcms.bloomberg.com/pip/simple blpapi
 
 # Bloomberg names : 
 DATE = blpapi.Name("date")
@@ -16,7 +15,7 @@ FIELD_ID = blpapi.Name("fieldId")
 SECURITY = blpapi.Name("security")
 SECURITY_DATA = blpapi.Name("securityData")
 
-# Bloomberg data importation : 
+
 class BLP():    
     
     def __init__(self):
@@ -44,7 +43,7 @@ class BLP():
     #-----------------------------------------------------------------------------------------------------
     
     def bdh(self, strSecurity, strFields, startdate, enddate, per='DAILY', perAdj = 'CALENDAR', 
-            days = 'NON_TRADING_WEEKDAYS', fill = 'PREVIOUS_VALUE', curr = None):
+            days = 'NON_TRADING_WEEKDAYS', fill = 'PREVIOUS_VALUE', curr = "EUR"):
         
         """
             Summary:
@@ -99,6 +98,7 @@ class BLP():
         dict_Security_Fields = {}
         dict_tickers = {}
         list_msg = []
+        
         for field in strFields:
             globals()['dict_'+ field]= {}
         
@@ -107,12 +107,14 @@ class BLP():
             
             # Ignores anything that's not partial or final
             if (event.eventType() !=blpapi.event.Event.RESPONSE) & (event.eventType() !=blpapi.event.Event.PARTIAL_RESPONSE):
-                continue
-            
+                continue      
+                        
             # Extract the response message
             msg = blpapi.event.MessageIterator(event).__next__()
-            # msg = blpapi.event.MessageIterator(event).next() # -> ne fonctionne pas
             
+            # Fill message list
+            list_msg.append(msg)
+                   
             # Break loop if response is final
             if event.eventType() == blpapi.event.Event.RESPONSE:
                 break        
@@ -262,10 +264,12 @@ class BLP():
             request.append('fields', strF)
         for strS in strSecurity:
             request.append('securities', strS)
-        # request.set('date', snapshot_date.strftime('%Y%m%d'))
-        # request.set('currency', curr)
-        o = request.getElement('overrides').appendElement()
-        o.setElement('value', snapshot_date)
+        
+        for strS in strSecurity:
+            overrides = request.getElement('overrides')
+            override = overrides.appendElement()
+            override.setElement('fieldId', 'REFERENCE_DATE')
+            override.setElement('value', snapshot_date.strftime('%Y%m%d'))
         
                 ############### Send request ###############
 
@@ -276,7 +280,7 @@ class BLP():
         
         list_msg = []
         dict_Security_Fields = {}
-        list_pd = []
+        list_compo = []
         
         while True:
             event = self.session.nextEvent()
@@ -296,66 +300,63 @@ class BLP():
                 break        
         
                 ############### Exploit data ###############
-         
+    
         for msg in list_msg:
             for sec_data in msg.getElement(SECURITY_DATA):  # Ticker
                 ticker = sec_data.getElement(SECURITY).getValue()
                 dict_Security_Fields = {}
-                for field in sec_data.getElement(FIELD_DATA):  # Fields
-                    dict_Security_Fields[field.name()] = field.getValue()
-                list_pd.append(pd.DataFrame(dict_Security_Fields, index=[ticker]))
-
-        return pd.concat(list_pd)
+                for member_data in sec_data.getElement(FIELD_DATA).getElement("INDX_MEMBERS"):
+                    ##### INDX_MEMBERS = strFields mis en argument mais je sais pas si on peut faire un truc flexible ici
+                    member = member_data.getElementAsString("Member Ticker and Exchange Code") 
+                    list_compo.append(member)
+                dict_Security_Fields[ticker] = pd.DataFrame(list_compo, columns=[snapshot_date])
     
+        return dict_Security_Fields
     
     def closeSession(self):
         print("Session closed")
         self.session.stop()
-    
-    
-    
+        
+        
 ####################################################################################################################
 ################################################# Data importation #################################################
-####################################################################################################################
-     
-# Cette partie pourras être mis dans le fichier data.py après les tests :)      
+####################################################################################################################    
      
 blp = BLP()
 
-# Récupération des compo (bds): 
-strFields = ["FIELD"] 
-tickers = ["RIY Index"] # RUSSEL 
-date = datetime(2024,2,28) # datetime(1999,1,28)
-test_bds = blp.bds(strSecurity=tickers, strFields = strFields, snapshot_date = date) #, curr = "USD"
+# Dates : 
+start_date = datetime(1999, 1, 28)
+end_date = datetime.now()
+dates_list = [start_date + i * timedelta(days=30) for i in range((end_date - start_date).days // 30 + 1)]
 
-# Il faut faire une liste avec toute les dates et tourner avec une boucle for ? 
-# Je sais pas si on peut tout prendre d'un coup ? 
+##### Composition des indices : #####
 
-# start_date = datetime(1999, 1, 28)
-# end_date = datetime.now()
+strFields = ["INDX_MEMBERS"] 
+tickers = ["RIY Index"] # RUSSEL
+df_compo = pd.DataFrame()
 
-# dates_list = [start_date + i * timedelta(days=30) for i in range((end_date - start_date).days // 30 + 1)]
-
-# df_compo = pd.DataFrame()
-# for date in dates_list :
-#     new_column = blp.bds(strSecurity=tickers, strFields = strFields, snapshot_date = date)
-#     # nom colonne = date 
-#     df_compo[date] = new_column [date]
-
-
-
+for date in dates_list :
+    results = blp.bds(strSecurity=tickers, strFields=strFields, snapshot_date=date)
+    new_column = results[tickers[0]]
+    df_compo[date] = new_column[date]
     
-# Récupération des fields (bdp): 
-# tickers = ["GLE FP Equity", "FP FP Equity"] # récupéré la liste du bds 
-# strFields = ["PX_LAST", "PX_VOLUME"] # +++ plein de truc 
-# Start_date et end_date déjà créés en haut (pour la liste)
-# test_bdh = blp.bdh(strSecurity=tickers, strFields = strFields, startdate = start_date, enddate = end_date, per='MONTHLY')
+df_compo = df_compo.drop(df_compo.columns[0], axis=1)
 
-    
-# Il faut renvoyer des dataframes comme ceux qu'on a commencé à utiliser 
-    
+# Aplatissement des tickers (pour avoir une unique liste de tickers pour toute les dates) :
+flattened_data = df_compo.values.ravel()
+flattened_data_unique = list(set(flattened_data))
+list_tickers = [ticker + " Equity" for ticker in flattened_data_unique]
+
+##### Data : #####
+
+tickers = list_tickers
+strFields = ["PX_LAST", "PX_VOLUME"] # On peut en mettre plus ici :)  
+
+dict_data = blp.bdh(strSecurity=tickers, strFields=strFields, startdate=start_date, enddate=end_date, per='MONTHLY', curr="USD")
+
 blp.closeSession()
-    
-# PS : bdp fonctionne, bdh j'ai pas testé 
-# PSS : bds a revoir 
-    
+
+## Conversion en excel : 
+# df_compo.to_excel("Bloomberg_Compo.xlsx", index=False)
+# dict_data["PX_LAST"].to_excel("Bloomberg_data_pxlast.xlsx", index=True)
+# dict_data["PX_VOLUME"].to_excel("Bloomberg_data_pxvolume.xlsx", index=True)
