@@ -30,8 +30,10 @@ print(portfolio_test)
 
 """
     TO DO : 
-    - Gerer la liste des exclusions 
-    - Essayer de comprendre la sortie bloom : même compo à chaque fois + données manquantes 
-    - Gerer les données manquantes 
+    - Gerer la liste des exclusions (salle bloom)
+    - Gerer les données manquantes -> Vérifier la date pour le bds (salle bloom)
+    
+    - Trier l'index des data 
+    - Tracer la perf -> Rebalancement tous les mois // faire un df par ptf (R1_V1, ...) pour toute les dates
     - 
 """

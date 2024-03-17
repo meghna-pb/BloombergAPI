@@ -269,7 +269,9 @@ class BLP():
             overrides = request.getElement('overrides')
             override = overrides.appendElement()
             override.setElement('fieldId', 'REFERENCE_DATE')
+            # CHAIN_EXP_DT_OVRD -> a tester 
             override.setElement('value', snapshot_date.strftime('%Y%m%d'))
+            # =BDS("ticket"; "field"; "overriding field=YYYYMDD")
         
                 ############### Send request ###############
 

@@ -2,8 +2,9 @@ import pandas as pd
 from performance import Performance
 from data import Data
 
-DATE = "date" # on s'en sert jamais 
-VOLUME = "PX_VOLUME" # Pourquoi ? 
+VOLUME = "PX_VOLUME"  
+PX_LAST = "PX_LAST"
+RETURNS = "RETURNS"
 
 class Signal:
     def __init__(self, data, risk_free_rate=0.02):
@@ -30,7 +31,7 @@ class Signal:
         :return: A dictionary containing the return and volume portfolios for each date.
         """  
         returns_ptf, volume_ptf = {}, {}
-        sorted_by_returns = data.sort_values(by='RETURNS', ascending=False) 
+        sorted_by_returns = data.sort_values(by=RETURNS, ascending=False) 
         sorted_by_volume = data.sort_values(by=VOLUME, ascending=False)    
 
         # Create return portfolios for the given date 
@@ -54,7 +55,7 @@ class Signal:
         """
         
         for date, date_data in self.data.items():    
-            date_data = date_data.dropna(subset=['PX_LAST', VOLUME], how="all")     
+            date_data = date_data.dropna(subset=[PX_LAST, VOLUME], how="all")     
             self.dict_portfolios[date] = {}
             
             self.dict_returns[date], self.dict_volume[date] = self.create_portfolios(date_data, n_returns, m_volume)
@@ -66,18 +67,3 @@ class Signal:
                     self.dict_portfolios[date][f'{R_i}_{V_j}'] = intersection_portfolio
 
         return self.dict_portfolios, date
-
-        
-        """
-            PETIT RESUME DES MODIFS : 
-            
-            1) Une nouvelle classe create_portfolios : même principe mais que pour une seule date 
-            (je voulais éviter une double boucle for inutile dans le process)
-            
-            2) Deux nouvelles variables : dict_returns et dict_volume 
-            -> Pour l'intesection c'est plus facile de les séparer 
-            -> self.portfolios contient maintenant les portfeuilles après intersections
-            
-            3) Nouvelle fonction create_intesections : remplis le dict.portfolios
-            TOUT les ptf sont construits (je sais je me contredit toute seule), à voir si ca prend vraiment plus de temps ou pas
-        """

@@ -16,7 +16,6 @@ class Data:
 
         self.df_compo.columns = pd.to_datetime(self.df_compo.columns, format='%Y%m%d')
         self.df_returns = self.__calculate_returns()
-        print(self.df_returns)
         self.df_exclusion = pd.DataFrame() # quand on aura le DF avec les titres à exclure
         
 
