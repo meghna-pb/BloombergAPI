@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-
 import blpapi
 # A installer sur les ordi bloom : python -m pip install --index-url=https://bcms.bloomberg.com/pip/simple blpapi
 

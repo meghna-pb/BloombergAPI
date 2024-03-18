@@ -1,10 +1,6 @@
 import pandas as pd
 from performance import Performance
-from data import Data
-
-VOLUME = "PX_VOLUME"  
-PX_LAST = "PX_LAST"
-RETURNS = "RETURNS"
+from data import Data, VOLUME,PX_LAST, RETURNS
 
 class Signal:
     def __init__(self, data, risk_free_rate=0.02):

@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
+from typing import Union, List
+import plotly.graph_objects as go
 
 """TEST DE PERFORMANCE (performance.py) :
 
@@ -12,14 +14,14 @@ from scipy import stats
 - Graphiques des performances (+ perf cumulées) 
 - Calcul de la t-stat pour tous les résultats  """
 
-class Performance:
-    def __init__(self, bench, portfolio, risk_free_rate=0.02):
+class Performance: 
+    def __init__(self, portfolio, risk_free_rate=0.02):
         """
         :param bench: DataFrame with benchmark data, including columns ['ticker', 'PX_LAST']
         :param portfolio: DataFrame with portfolio data, including columns ['ticker', 'weight', 'PX_LAST']
         :param risk_free_rate: Risk-free rate, default is 2%
         """
-        self.bench = bench
+        # self.bench = bench
         self.portfolio = portfolio
         self.risk_free_rate = risk_free_rate
         # C'est quoi le bench c'est quoi le portfolio ici ? 
@@ -40,22 +42,34 @@ class Performance:
         portfolio_returns = self.portfolio_returns()
         return portfolio_returns.quantile(1 - confidence_level)
 
-    def perf_ptf(self):
-        return (1 + self.portfolio_returns()).cumprod()
 
-    def perf_viewer(self):
-        plt.figure(figsize=(14, 7))
-        plt.subplot(1, 2, 1)
-        plt.plot(self.perf_ptf(), label='Portfolio Cumulative Returns')
-        plt.title('Portfolio Cumulative Returns')
-        plt.legend()
+    def viewer(self, returns_dict: dict, portfolio_keys: Union[str, List[str]] = None):
+        """
+        Function to visualize the full returns over time for specific portfolio(s) or all portfolios using Plotly.
+        
+        :param returns_dict: Dictionary containing full returns data for each portfolio.
+        :param portfolio_keys: Key(s) of the portfolio(s) for which returns will be visualized. If None, all portfolios will be plotted.
+        """
+        if portfolio_keys is None:
+            portfolio_keys = list(returns_dict.keys())
+            title = 'Full Returns Over Time for All Portfolios'
+        elif isinstance(portfolio_keys, str):
+            portfolio_keys = [portfolio_keys]
+            title = f'Full Returns Over Time for Portfolio {portfolio_keys[0]}'
+        else:
+            title = 'Full Returns Over Time for Selected Portfolios'
+            
+        fig = go.Figure()
+        for portfolio_key in portfolio_keys:
+            if portfolio_key not in returns_dict:
+                print(f"Portfolio key '{portfolio_key}' not found.")
+                continue
+            portfolio_data = returns_dict[portfolio_key]
+            fig.add_trace(go.Scatter(x=portfolio_data['Date'], y=portfolio_data['Full_Returns'], mode='lines+markers', name=f'Portfolio {portfolio_key}'))
 
-        plt.subplot(1, 2, 2)
-        plt.plot(self.portfolio_returns(), label='Portfolio Daily Returns')
-        plt.title('Portfolio Daily Returns')
-        plt.legend()
+        fig.update_layout(title=title, xaxis_title='Date', yaxis_title='Full Returns', legend_title='Portfolios')
+        fig.show()
 
-        plt.show()
 
     def t_stat(self):
         portfolio_returns = self.portfolio_returns()

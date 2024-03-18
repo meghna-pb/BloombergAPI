@@ -1,5 +1,9 @@
 import pandas as pd
 
+VOLUME = "PX_VOLUME"  
+PX_LAST = "PX_LAST"
+RETURNS = "RETURNS"
+
 class Data:
     def __init__(self, path=""): # exclusion:pd.DataFrame
         
@@ -7,8 +11,8 @@ class Data:
             # Pas testé, mais aucune raison que ca marche pas 
             from bloomberg import df_compo, dict_data
             self.df_compo = df_compo
-            self.df_px_last = df_compo["PX_LAST"]
-            self.df_px_volume = df_compo["PX_VOLUME"]
+            self.df_px_last = df_compo[PX_LAST].sort_index()
+            self.df_px_volume = df_compo[VOLUME].sort_index()
         else :
             self.df_compo = pd.read_excel(path+'/Bloomberg_Compo.xlsx', sheet_name="Compo")
             self.df_px_last = self.__reading_df(path+'/Bloomberg_Data.xlsx', sheet_name='PX LAST')
@@ -22,11 +26,11 @@ class Data:
     def __reading_df(self, path, sheet_name):
         df = pd.read_excel(path, sheet_name=sheet_name, index_col=0)
         df.columns = df.columns.str.replace(" Equity", "")
-        df.index = pd.to_datetime(df.index, format='%Y%m%d')       
+        df.index = pd.to_datetime(df.index, format='%Y%m%d')
         # if not df_exclusion is None:
         #     excluded_tickers = self.df_exclusion.index_tolist()
         #     df = df[~df.columns.isin(excluded_tickers)]
-        return df
+        return df.sort_index()
     
 
     def get_data(self): 
@@ -42,9 +46,9 @@ class Data:
 
             tickers = self.df_compo[nearest_date].dropna().tolist()
             
-            px_last_aligned = px_last_aligned.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: "PX_LAST"})
-            px_volume_aligned = px_volume_aligned.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: "PX_VOLUME"})
-            returns_aligned = returns_aligned.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: "RETURNS"})
+            px_last_aligned = px_last_aligned.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: PX_LAST})
+            px_volume_aligned = px_volume_aligned.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: VOLUME})
+            returns_aligned = returns_aligned.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: RETURNS})
 
             merged_df = pd.concat([px_last_aligned, px_volume_aligned, returns_aligned]).T
             data[nearest_date] = merged_df
