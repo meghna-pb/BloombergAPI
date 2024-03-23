@@ -2,6 +2,12 @@ import pandas as pd
 from performance import Performance
 from data import Data, VOLUME,PX_LAST, RETURNS
 
+pd.options.mode.chained_assignment = None
+
+# Déclaration des variables
+POSITION = "POSITION"
+SHORT, LONG = "SHORT", "LONG"
+
 class Signal:
     def __init__(self, data, risk_free_rate=0.02):
         """
@@ -35,6 +41,7 @@ class Signal:
             start_idx = i * len(sorted_by_returns) // min(n_returns, len(sorted_by_returns))
             end_idx = (i + 1) * len(sorted_by_returns) // min(n_returns, len(sorted_by_returns))
             returns_ptf[f'R{i+1}'] = sorted_by_returns.iloc[start_idx:end_idx]
+            returns_ptf[f'R{i+1}'].loc[:, POSITION] = LONG
         
         # R_n - R_1 (long/short): 
         returns_ptf[f'R{n_returns}-R1'] = self.create_long_short_portfolio(returns_ptf[f'R{n_returns}'], returns_ptf['R1'])
@@ -44,6 +51,7 @@ class Signal:
             start_idx = i * len(sorted_by_volume) // min(m_volume, len(sorted_by_volume))
             end_idx = (i + 1) * len(sorted_by_volume) // min(m_volume, len(sorted_by_volume))
             volume_ptf[f'V{i+1}'] = sorted_by_volume.iloc[start_idx:end_idx]
+            volume_ptf[f'V{i+1}'].loc[:, POSITION] = LONG
             
         # V_m - V_1 (long/short): 
         volume_ptf[f'V{m_volume}-V1'] = self.create_long_short_portfolio(volume_ptf[f'V{m_volume}'], volume_ptf['V1'])
@@ -52,7 +60,14 @@ class Signal:
 
 
     def create_long_short_portfolio(self, long_ptf, short_ptf) : 
-        return pd.concat([long_ptf, -short_ptf])
+        """
+            Create Long/Short portfolio 
+        """
+        # long_ptf = long_ptf.copy()
+        # short_ptf = short_ptf.copy()
+        long_ptf.loc[:, POSITION] = LONG
+        short_ptf.loc[:, POSITION] = SHORT
+        return pd.concat([long_ptf, short_ptf])
 
 
     def create_intersections(self, n_returns, m_volume):
@@ -69,7 +84,10 @@ class Signal:
             for R_i, R_portfolio in self.dict_returns[date].items():
                 for V_j, V_portfolio in self.dict_volume[date].items():                    
                     intersection_index = R_portfolio.index.intersection(V_portfolio.index)
+                    long_short_doublon = [share for share in intersection_index if R_portfolio.loc[share, POSITION] != V_portfolio.loc[share, POSITION]]
+                    ###### PROBLEME 
                     intersection_portfolio = R_portfolio.loc[intersection_index]
+                    intersection_portfolio = pd.concat([intersection_portfolio, R_portfolio.loc[long_short_doublon, :]])
                     self.dict_portfolios[date][f'{R_i}_{V_j}'] = intersection_portfolio
 
         return self.dict_portfolios, date
