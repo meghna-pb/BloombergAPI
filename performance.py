@@ -43,6 +43,31 @@ class Performance:
         return portfolio_returns.quantile(1 - confidence_level)
 
 
+    def table(self, returns_dict:dict, portfolios_R:Union[str, List[str]], portfolios_V:Union[str, List[str]]) :
+        """
+        Function to generates a table containing the mean returns for cross-portfolio combinations.
+
+        :param returns_dict : Dictionary containing full returns data for each portfolio.
+        :param portfolios_R : Name(s) of portfolio(s) related to returns.
+        :param portfolios_V : Name(s) of portfolio(s) related to volumes.
+
+        :returns : DataFrame containing mean returns for cross-portfolio combinations.
+    """
+        
+        if portfolios_R is None or len(portfolios_R) == 0:
+            print("Please, select returns portfolios")
+            pass
+        elif portfolios_V is None or len(portfolios_V) == 0:
+            print("Please, select volume portfolios")
+            pass
+                
+        tab = pd.DataFrame(index=portfolios_R, columns=portfolios_V)
+        for r in portfolios_R:
+            for v in portfolios_V:
+                tab.loc[r, v] = np.mean(returns_dict[f"{r}_{v}"]["Full_Returns"])
+        return tab
+
+
     def viewer(self, returns_dict: dict, portfolio_keys: Union[str, List[str]] = None):
         """
         Function to visualize the full returns over time for specific portfolio(s) or all portfolios using Plotly.

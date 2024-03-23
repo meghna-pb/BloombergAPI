@@ -85,5 +85,7 @@ class Optimisation:
                 if key not in returns_dict:
                     returns_dict[key] = pd.DataFrame(columns=['Date', 'Full_Returns'])
                 new_data = pd.DataFrame({'Date': [date], 'Full_Returns': [full_returns]})
+                returns_dict[key] = returns_dict[key].dropna(axis=1, how='all')
+                # la ligne précédente sert a éviter un msg d'erreur inutile :)  
                 returns_dict[key] = pd.concat([returns_dict[key], new_data], ignore_index=True)
         return returns_dict

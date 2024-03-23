@@ -27,22 +27,32 @@ class Signal:
         :return: A dictionary containing the return and volume portfolios for each date.
         """  
         returns_ptf, volume_ptf = {}, {}
-        sorted_by_returns = data.sort_values(by=RETURNS, ascending=False) 
-        sorted_by_volume = data.sort_values(by=VOLUME, ascending=False)    
+        sorted_by_returns = data.sort_values(by=RETURNS, ascending=True) ## False 
+        sorted_by_volume = data.sort_values(by=VOLUME, ascending=True) ## False 
 
         # Create return portfolios for the given date 
         for i in range(min(n_returns, len(sorted_by_returns))):
             start_idx = i * len(sorted_by_returns) // min(n_returns, len(sorted_by_returns))
             end_idx = (i + 1) * len(sorted_by_returns) // min(n_returns, len(sorted_by_returns))
             returns_ptf[f'R{i+1}'] = sorted_by_returns.iloc[start_idx:end_idx]
+        
+        # R_n - R_1 (long/short): 
+        returns_ptf[f'R{n_returns}-R1'] = self.create_long_short_portfolio(returns_ptf[f'R{n_returns}'], returns_ptf['R1'])
 
         # Create volume portfolios for the given date 
         for i in range(min(m_volume, len(sorted_by_volume))):
             start_idx = i * len(sorted_by_volume) // min(m_volume, len(sorted_by_volume))
             end_idx = (i + 1) * len(sorted_by_volume) // min(m_volume, len(sorted_by_volume))
             volume_ptf[f'V{i+1}'] = sorted_by_volume.iloc[start_idx:end_idx]
+            
+        # V_m - V_1 (long/short): 
+        volume_ptf[f'V{m_volume}-V1'] = self.create_long_short_portfolio(volume_ptf[f'V{m_volume}'], volume_ptf['V1'])
 
         return returns_ptf, volume_ptf
+
+
+    def create_long_short_portfolio(self, long_ptf, short_ptf) : 
+        return pd.concat([long_ptf, -short_ptf])
 
 
     def create_intersections(self, n_returns, m_volume):
