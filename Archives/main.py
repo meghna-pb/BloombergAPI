@@ -5,15 +5,15 @@ from signal_1 import Signal
 from  optimisation import Optimisation
 
 
-data = Data().get_data() # "Data"
+data = Data("Data").get_data()
 sig = Signal(data)
 
 intersec, exemple_date = sig.create_intersections(2, 2)
 portfolio_test = intersec[exemple_date]
 print(portfolio_test) #["R1_V1"]
-# perf = Performance(intersec)
-# opt =  Optimisation(intersec)
-# full_returns = opt.get_full_returns()
+perf = Performance(intersec)
+opt =  Optimisation(intersec)
+full_returns = opt.get_full_returns()
 
 """
     J'ai un doute sur certains ptf long/short : 
@@ -25,10 +25,10 @@ print(portfolio_test) #["R1_V1"]
 """
 
 # Visualisation qui fonctionne ! 
-# perf.viewer(full_returns, 
-#             portfolio_keys=None, 
-#             #["R10-R1_V3-V1", "R1_V1", "R10_V3"]
-#             )
+perf.viewer(full_returns, 
+            portfolio_keys=None, 
+            #["R10-R1_V3-V1", "R1_V1", "R10_V3"]
+            )
 # J'arrive pas a filtrer sur les ptf long short en même temps que les normaux mais ils apparaissent bien quand je les sort tous...
  
 

@@ -324,10 +324,9 @@ class BLP():
 blp = BLP()
 
 # Dates : 
-start_date = datetime(1999, 1, 28)
+start_date = datetime(2024, 1, 28) # datetime(1999, 1, 28)
 end_date = datetime.now()
-# dates_list = [start_date + i * timedelta(days=30) for i in range((end_date - start_date).days // 30 + 1)]
-dates_list = [datetime(2021, 2, 28), datetime(2024, 2, 28)] # <- Pour les tests bloom
+dates_list = [start_date + i * timedelta(days=30) for i in range((end_date - start_date).days // 30 + 1)]
 
 ##### Index compositions: #####
 

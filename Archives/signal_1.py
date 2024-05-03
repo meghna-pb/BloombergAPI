@@ -74,7 +74,7 @@ class Signal:
         """
             Get intersections of return and volume portfolios for each date.
         """
-
+        
         for date, date_data in self.data.items():    
             date_data = date_data.dropna(subset=[PX_LAST, VOLUME], how="all")     
             self.dict_portfolios[date] = {}

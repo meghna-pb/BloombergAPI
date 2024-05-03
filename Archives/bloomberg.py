@@ -267,10 +267,8 @@ class BLP():
         for strS in strSecurity:
             overrides = request.getElement('overrides')
             override = overrides.appendElement()
-            override.setElement('fieldId', 'REFERENCE_DATE')
-            # CHAIN_EXP_DT_OVRD -> a tester 
+            override.setElement('fieldId', 'END_DT')
             override.setElement('value', snapshot_date.strftime('%Y%m%d'))
-            # =BDS("ticket"; "field"; "overriding field=YYYYMDD")
         
                 ############### Send request ###############
 
@@ -282,6 +280,7 @@ class BLP():
         list_msg = []
         dict_Security_Fields = {}
         list_compo = []
+        field_name = strFields[0]
         
         while True:
             event = self.session.nextEvent()
@@ -306,9 +305,8 @@ class BLP():
             for sec_data in msg.getElement(SECURITY_DATA):  # Ticker
                 ticker = sec_data.getElement(SECURITY).getValue()
                 dict_Security_Fields = {}
-                for member_data in sec_data.getElement(FIELD_DATA).getElement("INDX_MEMBERS"):
-                    ##### INDX_MEMBERS = strFields mis en argument mais je sais pas si on peut faire un truc flexible ici
-                    member = member_data.getElementAsString("Member Ticker and Exchange Code") 
+                for member_data in sec_data.getElement(FIELD_DATA).getElement(field_name):
+                    member = member_data.getElementAsString("Index Member") 
                     list_compo.append(member)
                 dict_Security_Fields[ticker] = pd.DataFrame(list_compo, columns=[snapshot_date])
     
@@ -328,36 +326,49 @@ blp = BLP()
 # Dates : 
 start_date = datetime(1999, 1, 28)
 end_date = datetime.now()
-dates_list = [start_date + i * timedelta(days=30) for i in range((end_date - start_date).days // 30 + 1)]
+# dates_list = [start_date + i * timedelta(days=30) for i in range((end_date - start_date).days // 30 + 1)]
+dates_list = [datetime(2021, 2, 28), datetime(2024, 2, 28)] # <- Pour les tests bloom
 
-##### Composition des indices : #####
+##### Index compositions: #####
 
-strFields = ["INDX_MEMBERS"] 
+strFields = ["INDX_MWEIGHT_HIST"]  
 tickers = ["RIY Index"] # RUSSEL
 df_compo = pd.DataFrame()
 
 for date in dates_list :
     results = blp.bds(strSecurity=tickers, strFields=strFields, snapshot_date=date)
     new_column = results[tickers[0]]
+    new_column = new_column[~new_column[date].astype(str).apply(lambda x: any(char.isdigit() for char in x))]
     df_compo[date] = new_column[date]
-    
-df_compo = df_compo.drop(df_compo.columns[0], axis=1)
 
-# Aplatissement des tickers (pour avoir une unique liste de tickers pour toute les dates) :
+# Flatten tickers (to have a unique list of tickers for all dates):
 flattened_data = df_compo.values.ravel()
 flattened_data_unique = list(set(flattened_data))
-list_tickers = [ticker + " Equity" for ticker in flattened_data_unique]
+list_tickers = [str(ticker) + " Equity" for ticker in flattened_data_unique]
 
 ##### Data : #####
 
 tickers = list_tickers
-strFields = ["PX_LAST", "PX_VOLUME"] # On peut en mettre plus ici :)  
+strFields = ["PX_LAST", "PX_VOLUME"] 
+# strFields = ["RETURN_COM_EQY", "PE_RATIO", "EARN_YLD", "TURNOVER", "CUR_MKT_CAP", "NORMALIZED_ROE", "EQY_TURNOVER_REALTIME", "EQY_FLOAT"]
 
 dict_data = blp.bdh(strSecurity=tickers, strFields=strFields, startdate=start_date, enddate=end_date, per='MONTHLY', curr="USD")
 
 blp.closeSession()
 
-## Conversion en excel : 
+
+## Conversion to Excel Files: 
+    
 # df_compo.to_excel("Bloomberg_Compo.xlsx", index=False)
 # dict_data["PX_LAST"].to_excel("Bloomberg_data_pxlast.xlsx", index=True)
 # dict_data["PX_VOLUME"].to_excel("Bloomberg_data_pxvolume.xlsx", index=True)
+
+# dict_data["RETURN_COM_EQY"].to_excel("Bloomberg_data_RETURN_COM_EQY.xlsx", index=True)
+# dict_data["PE_RATIO"].to_excel("Bloomberg_data_PE_RATIO.xlsx", index=True)
+# dict_data["EARN_YLD"].to_excel("Bloomberg_data_EARN_YLD.xlsx", index=True)
+# dict_data["TURNOVER"].to_excel("Bloomberg_data_TURNOVER.xlsx", index=True)
+# dict_data["CUR_MKT_CAP"].to_excel("Bloomberg_data_CUR_MKT_CAP.xlsx", index=True)
+# dict_data["NORMALIZED_ROE"].to_excel("Bloomberg_data_NORMALIZED_ROE.xlsx", index=True)
+# dict_data["EQY_TURNOVER_REALTIME"].to_excel("Bloomberg_data_EQY_TURNOVER_REALTIME.xlsx", index=True)
+# dict_data["EQY_FLOAT"].to_excel("Bloomberg_data_EQY_FLOAT.xlsx", index=True)
+
