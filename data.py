@@ -14,25 +14,17 @@ class Data:
             self.df_px_volume = dict_data[VOLUME].sort_index()
         else :
             self.df_compo = pd.read_excel(path+'/Bloomberg_Compo.xlsx', sheet_name="Compo")
-            self.df_px_last = self.__reading_df(path+'/Bloomberg_Data.xlsx', sheet_name='PX LAST')
-            self.df_px_volume = self.__reading_df(path+'/Bloomberg_Data.xlsx', sheet_name='PX VOLUME')
-
-        self.df_px_last.columns = self.df_px_last.columns.str.replace(" Equity", "")
-        self.df_px_volume.columns = self.df_px_volume.columns.str.replace(" Equity", "")
-        self.df_px_last.index = pd.to_datetime(self.df_px_last.index, format='%Y%m%d')
-        self.df_px_volume.index = pd.to_datetime(self.df_px_volume.index, format='%Y%m%d')
+            self.df_px_last = pd.read_excel(path+'/Bloomberg_Data.xlsx', sheet_name='PX LAST', index_col=0)
+            self.df_px_volume = pd.read_excel(path+'/Bloomberg_Data.xlsx', sheet_name='PX VOLUME', index_col=0)
+    
+        self.df_px_last = self.__treat_df(self.df_px_last, format='%Y%m%d')
+        self.df_px_volume = self.__treat_df(self.df_px_volume, format='%Y%m%d')
         self.df_compo.columns = pd.to_datetime(self.df_compo.columns, format='%Y%m%d')
         self.df_returns = self.__calculate_returns()
-        self.df_exclusion = pd.DataFrame() # quand on aura le DF avec les titres à exclure
         
-
-    def __reading_df(self, path, sheet_name):
-        df = pd.read_excel(path, sheet_name=sheet_name, index_col=0)
-        # df.columns = df.columns.str.replace(" Equity", "")
-        # df.index = pd.to_datetime(df.index, format='%Y%m%d')
-        # if not df_exclusion is None:
-        #     excluded_tickers = self.df_exclusion.index_tolist()
-        #     df = df[~df.columns.isin(excluded_tickers)]
+    def __treat_df(self, df, format):
+        df.columns = df.columns.str.replace(" Equity", "")
+        df.index = pd.to_datetime(df.index, format=format)
         return df.sort_index()
     
 

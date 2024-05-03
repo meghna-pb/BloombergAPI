@@ -5,7 +5,7 @@ from signal_1 import Signal
 from  optimisation import Optimisation
 
 
-data = Data().get_data() # "Data"
+data = Data("Data").get_data() # "Data"
 sig = Signal(data)
 
 intersec, exemple_date = sig.create_intersections(2, 2)
@@ -44,11 +44,7 @@ where K 5 three, six, nine, or 12 months."
 """
 
 
-"""
-    TO DO : 
-    - Gerer la liste des exclusions (salle bloom)
-    - Gerer les données manquantes -> Vérifier la date pour le bds (salle bloom)
-    
+"""    
     PS : SENS DES PTF INVERSE COMME DANS L ARTICLE 
     -> R1 = looser, Rn = winner 
 """
