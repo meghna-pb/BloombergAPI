@@ -1,33 +1,42 @@
 IMPORTATION DES DONNEES (bloomberg.py) : 
+- Importation des données depuis bloomberg 			-> OK
+- Création de dataframes (PX_LAST, PX_RETURNS, COMPO, ...) 	-> OK
 
-- Test Import avec fonction BDS -> salle bloom 
-+ Enregistrement des données (dataframe to excel ?) -> salle bloom
-- Ajustement de la fonctions pour les inputs 
 
 TRAITEMENT DES DONNEES (data.py) : 
-+ Calcul des rendements 
-+ Creation de dataframe 
-- Retraitement initial des entreprises non éligibles ? 
+- Récupération des data (Bloom ou Excel) 			-> OK
+- Calcul des rendements (full periode) 				-> OK
+- Création de dictionnaires par date 				-> OK
+- Retraitement des entreprises ? 				-> NOK
 
 
 CLASSEMENT DES DONNEES (signal.py) : 
-
-+ Classement -> rendements passés + volume de transaction passées 
-+ Creation des portefeuilles rendements et volume 
-+ Creation des portefeuilles d'intersection 
-
-
-CONSTRUCTION DES PORTEFEUILLES (optimisation.py) : 
-
-- Selection des poids pour chaque shares 
-- Appels de la classe optimisation pour choisir les pondérations 
+- Classement des données (returns et volume) 			-> OK
+- Création de portefeuilles simples 				-> OK
+- Création de portefeuilles Long/Short 				-> OK
+- Création de portefeuilles croisés (R x V) 			-> OK
 
 
-TEST DE PERFORMANCE (performance.py) : --> il faut faire test !!!
+PONDERATION DES PORTEFEUILLES (optimisation.py) : 
+- Calcul des poids équipondérés 				-> OK
+- Calcul des poids selon volatilité 
+- Calcul des poids selon ratio de sharpe ? 
+Rq : Appels de la classe perf pour meilleure pondération 
 
+
+TEST DE PERFORMANCE (performance.py) : 
 - Calcul de la tracking error 
 - Calcul du ratio de sharpe 
 - Calcul de la Value at Risk 
 - Calcul des performances 
 - Graphiques des performances (+ perf cumulées) 
 - Calcul de la t-stat pour tous les résultats  
+
+
+Résumé process : 
+1) Calcul des rendements sur toute les données (par date) 
+2) Tri des données et création de portefeuilles simples (returns et volume) 
+3) Création de portefeuille croisé (Returns x Volume) 
+4) Pondération des actifs par portefeuilles 
+5) Calcul des rendements par portefeuilles (simples et croisés)
+6) Création de portefeuilles Long/Short (+ somme rendements) 

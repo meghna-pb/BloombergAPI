@@ -88,6 +88,6 @@ class Signal:
                     ###### PROBLEME 
                     intersection_portfolio = R_portfolio.loc[intersection_index]
                     intersection_portfolio = pd.concat([intersection_portfolio, R_portfolio.loc[long_short_doublon, :]])
-                    self.dict_portfolios[date][f'({R_i})_({V_j})'] = intersection_portfolio
+                    self.dict_portfolios[date][f'{R_i}_{V_j}'] = intersection_portfolio
 
         return self.dict_portfolios, date
