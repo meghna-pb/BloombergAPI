@@ -6,6 +6,7 @@ IMPORTATION DES DONNEES (bloomberg.py) :
 TRAITEMENT DES DONNEES (data.py) : 
 - Récupération des data (Bloom ou Excel) 			-> OK
 - Calcul des rendements (full periode) 				-> OK
+- Calcul des volatilités (full periode) 			-> OK
 - Création de dictionnaires par date 				-> OK
 - Retraitement des entreprises ? 				-> NOK
 
@@ -19,9 +20,9 @@ CLASSEMENT DES DONNEES (signal.py) :
 
 PONDERATION DES PORTEFEUILLES (optimisation.py) : 
 - Calcul des poids équipondérés 				-> OK
-- Calcul des poids selon volatilité 
-- Calcul des poids selon ratio de sharpe ? 
-Rq : Appels de la classe perf pour meilleure pondération 
+- Calcul des poids selon volatilité 				-> OK
+- Calcul des poids selon ratio de sharpe 
+Rq : Appels de la classe perf pour meilleure pondération ?
 
 
 TEST DE PERFORMANCE (performance.py) : 

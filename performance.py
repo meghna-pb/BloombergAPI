@@ -8,6 +8,8 @@ from optimisation import DATES, RETURNS
 class Performance: 
     def __init__(self, portfolio):
         """
+        Initialize the Performance class with portfolio data.
+        
         :param portfolio: DataFrame with portfolio data, including columns ['ticker', 'weight', 'PX_LAST']
         """
         self.portfolio = portfolio
@@ -41,6 +43,13 @@ class Performance:
         fig.show()
         
     def table(self, dict_returns:dict, ptf_R:Union[str, List[str]], ptf_V:Union[str, List[str]]) :     
+        """
+        Generate a table comparing returns across specified portfolios.
+        
+        :param dict_returns: Dictionary of returns data keyed by portfolio and variable (e.g., 'R_V').
+        :param ptf_R: List or string of portfolio keys to include as rows in the table.
+        :param ptf_V: List or string of portfolio keys to include as columns in the table.
+        """
         if ptf_R is None or len(ptf_R) == 0:
             raise ("Select returns portfolios")
         elif ptf_V is None or len(ptf_V) == 0:

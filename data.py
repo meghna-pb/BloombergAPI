@@ -1,15 +1,20 @@
 import pandas as pd
 
-VOLUME = "PX_VOLUME"
-PX_LAST = "PX_LAST"
-RETURNS = "RETURNS"
-VOLATILITY = "VOLATILITY"
-EXPECTED_RETURNS = "EXPECTED_RETURNS"
+VOLUME, PX_LAST, RETURNS = "PX_VOLUME", "PX_LAST", "RETURNS"
+VOLATILITY, EXPECTED_RETURNS, RFR = "VOLATILITY", "EXPECTED_RETURNS", "RFR"
 
 class Data:
-    def __init__(self, path="", J=3):
-
+    def __init__(self, path="", J=3, risk_free_rate:float=0.2) -> None:
+        """
+        Initialize the Data class with the option to load data from a specified path or use predefined Bloomberg data.
+        
+        :param path: Path to the Excel files containing the data. If empty, uses predefined Bloomberg data.
+        :param J: Number of periods used for calculating rolling statistics such as volatility and expected returns.
+        :param risk_free_rate: The risk-free rate used in financial calculations.
+        """
+        
         self.J = J  
+        self.risk_free_rate = risk_free_rate
         
         if path == "":
             from bloomberg import df_compo, dict_data
@@ -28,25 +33,48 @@ class Data:
         self.df_volatility = self.__calculate_volatility()
         self.df_expected_returns = self.__calculate_expected_returns()
         
-    def __treat_df(self, df, format):
+        
+    def __treat_df(self, df, format) -> pd.DataFrame:
+        """
+        Cleans DataFrame columns, including stripping of extra characters and standardizing date formats.
+        
+        :param df: DataFrame to be treated.
+        :param format: String format to parse the index as dates.
+        """
         df.columns = df.columns.str.replace(" Equity", "")
         df.index = pd.to_datetime(df.index, format=format)
         return df.sort_index()
 
-    def __calculate_returns(self):
-        return self.df_px_last.apply(lambda column: column.ffill().pct_change(self.J, fill_method=None).dropna()) 
+    def __calculate_returns(self) -> pd.DataFrame:
+        """
+        Calculates the percentage change in PX_LAST to derive returns, applied on a forward-filled DataFrame.
+        """
+        return self.df_px_last.apply(lambda colonne: colonne.ffill().pct_change(fill_method=None).dropna())
     
-    def __calculate_volatility(self):
+    def __calculate_volatility(self) -> pd.DataFrame:
+        """
+        Calculates rolling volatility over the specified window J and handles any resulting NA values.
+        """
         df_volatility = self.df_returns.rolling(window=self.J).std()
         df_volatility.replace(0, pd.NA, inplace=True)
-        return df_volatility.fillna(df_volatility.median())
+        df_volatility = df_volatility.fillna(method='ffill').fillna(method='bfill')
+        return df_volatility
     
-    def __calculate_expected_returns(self):
-        return self.df_returns.rolling(window=self.J).mean()
+    def __calculate_expected_returns(self) -> pd.DataFrame:
+        """
+        Calculates expected returns as the rolling mean of returns over the specified window J.
+        """
+        df_expected_returns = self.df_returns.rolling(window=self.J).mean()
+        return df_expected_returns.fillna(method='bfill')
 
-    def get_data(self, K:int=1):
+    def get_data(self, K:int=1) -> dict:
+        """
+        Aggregates and aligns all financial data by rebalancing date intervals, tailored for portfolio construction.
+        
+        :param K: Frequency of rebalance in months.
+        """
         data = {}
-        valid_index = self.df_px_last.index[self.J+1] 
+        valid_index = self.df_px_last.index[self.J]  # +1
         rebalance_dates = pd.date_range(valid_index, self.df_px_last.index[-1], freq=f'{K}ME')
 
         for date in rebalance_dates :
@@ -64,4 +92,5 @@ class Data:
                                             returns.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: RETURNS}), 
                                             volatility.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: VOLATILITY}), 
                                             expected_returns.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: EXPECTED_RETURNS})]).T
+                data[nearest_date][RFR] = self.risk_free_rate
         return data

@@ -2,12 +2,20 @@ import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
 
-from data import Data, RETURNS, VOLUME, VOLATILITY, EXPECTED_RETURNS
+from data import Data, RETURNS, VOLUME
 WEIGHT, WEIGHTED_RETURNS = "WEIGHT", "WEIGHTED_RETURNS"
 POSITION, LONG, SHORT = "POSITION", "LONG", "SHORT"
 
 class Signal:
     def __init__(self, data:Data, K:int=1, n_returns:int=5, m_volume:int=3):
+        """
+        Initialize the Signal class to manage and analyze financial signals.
+        
+        :param data: An instance of the Data class, which provides financial data.
+        :param K: Frequency of data retrieval in terms of months.
+        :param n_returns: Number of portfolios to create based on returns.
+        :param m_volume: Number of portfolios to create based on volume.
+        """
         self.data = data.get_data(K=K)
         self.n = n_returns
         self.m = m_volume
@@ -16,6 +24,11 @@ class Signal:
         self.intersected_portfolios = None
 
     def create_simple_portfolios(self) -> tuple:
+        """
+        Create simple portfolios based on top n returns and top m volumes.
+        
+        :return: Tuple containing dictionaries of returns portfolios and volume portfolios.
+        """
         dict_returns, dict_volume = {}, {}
         for date, date_data in self.data.items():    
             dated_data = date_data.dropna() # subset=[PX_LAST, VOLUME], how="all"  
@@ -26,6 +39,12 @@ class Signal:
         return self.simple_returns_portfolios, self.simple_volume_portfolios
 
     def __create_dated_portfolio(self, dated_data) -> tuple:
+        """
+        Create portfolios for a specific date sorted by returns and volume.
+        
+        :param dated_data: DataFrame containing the data for a specific date.
+        :return: Tuple of dictionaries for returns-based and volume-based portfolios.
+        """
         returns_ptf, volume_ptf = {}, {}
         sorted_by_returns = dated_data.sort_values(by=RETURNS, ascending=False)
         sorted_by_volume = dated_data.sort_values(by=VOLUME, ascending=False)
@@ -45,12 +64,26 @@ class Signal:
         return returns_ptf, volume_ptf
     
     def __add_longshort_portfolios(self, long_ptf:pd.DataFrame, short_ptf:pd.DataFrame) -> pd.DataFrame:
+        """
+        Combine long and short portfolios into a single DataFrame.
+        
+        :param long_ptf: DataFrame of long positions.
+        :param short_ptf: DataFrame of short positions.
+        :return: Concatenated DataFrame with long and short positions.
+        """
         long_ptf[POSITION] = LONG
         short_ptf[POSITION] = SHORT
         return pd.concat([long_ptf, short_ptf])
     
 
     def create_intersected_portfolios(self, returns_ptf: dict, volume_ptf: dict) -> dict:
+        """
+        Create portfolios that intersect based on returns and volume portfolio positions.
+        
+        :param returns_ptf: Dictionary of returns portfolios.
+        :param volume_ptf: Dictionary of volume portfolios.
+        :return: Dictionary of intersected portfolios.
+        """        
         dict_intersections = {}
     
         for date in self.data.keys():
