@@ -17,7 +17,7 @@ class Performance:
         """
         self.portfolio = portfolio
 
-    def viewer(self, returns_dict: dict, portfolio_keys: Union[str, List[str]] = None):
+    def viewer(self, dict_returns: dict, portfolio_keys: Union[str, List[str]] = None):
         """
         Function to visualize the full returns over time for specific portfolio(s) or all portfolios using Plotly.
         
@@ -25,7 +25,7 @@ class Performance:
         :param portfolio_keys: Key(s) of the portfolio(s) for which returns will be visualized. If None, all portfolios will be plotted.
         """
         if portfolio_keys is None:
-            portfolio_keys = list(returns_dict.keys())
+            portfolio_keys = list(dict_returns.keys())
             title = 'Full Returns Over Time for All Portfolios'
         elif isinstance(portfolio_keys, str):
             portfolio_keys = [portfolio_keys]
@@ -35,13 +35,41 @@ class Performance:
             
         fig = go.Figure()
         for portfolio_key in portfolio_keys:
-            if portfolio_key not in returns_dict:
+            if portfolio_key not in dict_returns:
                 print(f"Portfolio key '{portfolio_key}' not found.")
                 continue
-            portfolio_data = returns_dict[portfolio_key]
+            portfolio_data = dict_returns[portfolio_key]
             fig.add_trace(go.Scatter(x=portfolio_data[DATES], y=portfolio_data[RETURNS], mode='lines+markers', name=f'Portfolio {portfolio_key}'))
 
         fig.update_layout(title=title, xaxis_title=DATES, yaxis_title=RETURNS, legend_title='Portfolios')
+        fig.show()
+        
+    def cumulative_viewer(self, dict_returns: dict, portfolio_keys: Union[str, List[str]] = None):
+        """
+        Function to visualize the cumulative returns over time for specific portfolio(s) or all portfolios using Plotly.
+        
+        :param returns_dict: Dictionary containing full returns data for each portfolio.
+        :param portfolio_keys: Key(s) of the portfolio(s) for which returns will be visualized. If None, all portfolios will be plotted.
+        """
+        if portfolio_keys is None:
+            portfolio_keys = list(dict_returns.keys())
+            title = 'Cumulative Returns Over Time for All Portfolios'
+        elif isinstance(portfolio_keys, str):
+            portfolio_keys = [portfolio_keys]
+            title = f'Cumulative Returns Over Time for Portfolio {portfolio_keys[0]}'
+        else:
+            title = 'Cumulative Returns Over Time for Selected Portfolios'
+        
+        fig = go.Figure()
+        for portfolio_key in portfolio_keys:
+            if portfolio_key not in dict_returns:
+                print(f"Portfolio key '{portfolio_key}' not found.")
+                continue
+            portfolio_data = dict_returns[portfolio_key]
+            cumulative_returns = (1 + portfolio_data[RETURNS]).cumprod() - 1
+            fig.add_trace(go.Scatter(x=portfolio_data[DATES], y=cumulative_returns, mode='lines+markers', name=f'Portfolio {portfolio_key}'))
+        
+        fig.update_layout(title=title, xaxis_title='Date', yaxis_title='Cumulative Returns', legend_title='Portfolios')
         fig.show()
         
     def table(self, dict_returns:dict, ptf_R:Union[str, List[str]], ptf_V:Union[str, List[str]]) :     
@@ -64,7 +92,49 @@ class Performance:
         return tab
     
     
-    def sharpe_ratio(self, risk_free_rate):
+    def sharpe_ratio(self, dict_returns:dict, risk_free_rate):
+        """
+        Calculate the Sharpe Ratio for each portfolio based on returns provided in 'dict_returns'.
+    
+        :param dict_returns: Dictionary containing returns data for each portfolio.
+        :param risk_free_rate: The risk-free interest rate.
+        :return: A dictionary with Sharpe Ratios for each portfolio.
+        """
+        results = {}
+        for key, data in dict_returns.items(): # self.portfolio.items():
+            results[key] = round((data[RETURNS].mean() - risk_free_rate) / data[RETURNS].std(), 2)
+            # * np.sqrt(12) ? je sais jamais ou il faut le mettre 
+        return results
+    
+    def value_at_risk(self, dict_returns:dict, confidence_level=0.05):
+        """
+        Calculate the Value at Risk (VaR) at a specified confidence level for each portfolio. 
+    
+        :param dict_returns: Dictionary containing returns data for each portfolio.
+        :param confidence_level: Confidence level for the VaR calculation, default is 0.05 (95% confidence).
+        :return: A dictionary with the VaR for each portfolio, negative values indicate losses.
+        """
+        results = {}
+        for key, data in dict_returns.items() : #self.portfolio.items():
+            results[key] = round(np.percentile(data[RETURNS], 100 * (1 - confidence_level)), 2)
+        return results
+    
+    def tracking_error(self, dict_returns:dict, benchmark_returns):
+        """
+        Calculate the tracking error against a benchmark for each portfolio. 
+    
+        :param dict_returns: Dictionary containing returns data for each portfolio.
+        :param benchmark_returns: DataFrame or Series containing the benchmark returns.
+        :return: A dictionary with tracking error values for each portfolio.
+        """
+        results = {}
+        for key, data in dict_returns.items():
+            results[key] = (data[RETURNS] - benchmark_returns[RETURNS]).std()
+        return results
+        #### AI BESOIN D'UN BENCHMARK POUR TESTER 
+    
+    
+    def sharpe_ratio_meghna (self, risk_free_rate):
         sharpe_ptf = {}
 
         unique_portfolio_names = set()
@@ -83,7 +153,7 @@ class Performance:
             sharpe_ptf[name] = np.mean(all_excess_returns) / np.std(all_excess_returns) * np.sqrt(12)
         return sharpe_ptf
     
-    def VaR(self, confidence_level=0.95):
+    def VaR_meghna(self, confidence_level=0.95):
         VaR_dict = {}
         unique_portfolio_names = set()
         for date in self.portfolio.keys():

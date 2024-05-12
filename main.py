@@ -143,12 +143,17 @@ def test(J, K, n, m, risk_free_rate, ponderation_method) :
 
     perf = Performance(portfolio=intersection)
     # perf.viewer(full_returns, portfolio_keys=None)
-    # print(perf.sharpe_ratio(risk_free_rate))
-    print(perf.VaR())
-
+    perf.cumulative_viewer(full_returns)
     # table = perf.table(full_returns, ["R1", "R5", "R10", "R10-R1"], ["V1", "V2", "V3", "V3-V1"])
     # print(table)
+    
+    # print(perf.sharpe_ratio_meghna(risk_free_rate)) # Meghna
+    print(perf.sharpe_ratio(full_returns=full_returns, risk_free_rate=risk_free_rate)) # Caro
+    # print(perf.VaR_meghna(confidence_level=0.95)) # Meghna 
+    print(perf.value_at_risk(full_returns=full_returns, confidence_level=0.95)) # Caro
     
 test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="equi") # -> OK
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="vol") # -> OK
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="sharpe") # -> OK
+
+# Remarque : je pense que ca serait plus smart de calculer les full_returns directement dans la classe perf ? 
