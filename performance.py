@@ -2,8 +2,11 @@ import pandas as pd
 import numpy as np
 from typing import Union, List
 import plotly.graph_objects as go
+from data import EXPECTED_RETURNS
+from optimisation import DATES, RETURNS, WEIGHT
 
-from optimisation import DATES, RETURNS
+SHARPE_RATIO = "SHARPE_RATIO"
+
 
 class Performance: 
     def __init__(self, portfolio):
@@ -13,7 +16,6 @@ class Performance:
         :param portfolio: DataFrame with portfolio data, including columns ['ticker', 'weight', 'PX_LAST']
         """
         self.portfolio = portfolio
-
 
     def viewer(self, returns_dict: dict, portfolio_keys: Union[str, List[str]] = None):
         """
@@ -60,3 +62,43 @@ class Performance:
             for v in ptf_V:
                 tab.loc[r, v] = np.mean(dict_returns[f"{r}_{v}"][RETURNS])
         return tab
+    
+    
+    def sharpe_ratio(self, risk_free_rate):
+        sharpe_ptf = {}
+
+        unique_portfolio_names = set()
+        for date in self.portfolio.keys():
+            unique_portfolio_names.update(self.portfolio[date].keys())
+
+        for name in unique_portfolio_names:
+            all_excess_returns = []  
+            for date in self.portfolio.keys():  
+                ptf = self.portfolio[date].get(name)
+                if ptf is not None and not ptf.empty:
+                    excess_returns = (ptf[EXPECTED_RETURNS] * ptf[WEIGHT]) - risk_free_rate / 12
+                    all_excess_returns.extend(excess_returns.tolist())
+
+            all_excess_returns = np.array(all_excess_returns)
+            sharpe_ptf[name] = np.mean(all_excess_returns) / np.std(all_excess_returns) * np.sqrt(12)
+        return sharpe_ptf
+    
+    def VaR(self, confidence_level=0.95):
+        VaR_dict = {}
+        unique_portfolio_names = set()
+        for date in self.portfolio.keys():
+            unique_portfolio_names.update(self.portfolio[date].keys())
+        for name in unique_portfolio_names:
+            all_returns = []
+            for date in self.portfolio.keys():
+                ptf = self.portfolio[date].get(name)
+                if ptf is not None and not ptf.empty:
+                    returns = ptf[EXPECTED_RETURNS] * ptf[WEIGHT]
+                    all_returns.extend(returns.tolist())
+            all_returns = np.array(all_returns)
+            if len(all_returns) > 0:
+                VaR_dict[name] = -np.percentile(all_returns, confidence_level * 100)
+            else:
+                VaR_dict[name] = None
+
+        return VaR_dict

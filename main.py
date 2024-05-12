@@ -142,10 +142,13 @@ def test(J, K, n, m, risk_free_rate, ponderation_method) :
     full_returns = optim.get_full_results(intersection)
 
     perf = Performance(portfolio=intersection)
-    perf.viewer(full_returns, portfolio_keys=None)
+    # perf.viewer(full_returns, portfolio_keys=None)
+    # print(perf.sharpe_ratio(risk_free_rate))
+    print(perf.VaR())
+
     # table = perf.table(full_returns, ["R1", "R5", "R10", "R10-R1"], ["V1", "V2", "V3", "V3-V1"])
     # print(table)
     
-# test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="equi") # -> OK
+test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="equi") # -> OK
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="vol") # -> OK
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="sharpe") # -> OK
