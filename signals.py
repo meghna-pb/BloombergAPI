@@ -2,7 +2,7 @@ import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
 
-from data import Data, RETURNS, VOLUME
+from data import Data, RETURNS, VOLUME, PX_LAST, VOLATILITY, RFR
 WEIGHT, WEIGHTED_RETURNS = "WEIGHT", "WEIGHTED_RETURNS"
 POSITION, LONG, SHORT = "POSITION", "LONG", "SHORT"
 

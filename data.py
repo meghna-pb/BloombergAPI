@@ -1,7 +1,6 @@
 import pandas as pd
 
-VOLUME, PX_LAST, RETURNS = "PX_VOLUME", "PX_LAST", "RETURNS"
-VOLATILITY, EXPECTED_RETURNS, RFR = "VOLATILITY", "EXPECTED_RETURNS", "RFR"
+VOLUME, PX_LAST, RETURNS, VOLATILITY, RFR = "PX_VOLUME", "PX_LAST", "RETURNS", "VOLATILITY", "RFR"
 
 class Data:
     def __init__(self, path="", J=3, risk_free_rate:float=0.2) -> None:
@@ -31,7 +30,7 @@ class Data:
         self.df_compo.columns = pd.to_datetime(self.df_compo.columns, format='%Y%m%d')
         self.df_returns = self.__calculate_returns()
         self.df_volatility = self.__calculate_volatility()
-        self.df_expected_returns = self.__calculate_expected_returns()
+        
         
         
     def __treat_df(self, df, format) -> pd.DataFrame:
@@ -59,13 +58,6 @@ class Data:
         df_volatility.replace(0, pd.NA, inplace=True)
         df_volatility = df_volatility.fillna(method='ffill').fillna(method='bfill')
         return df_volatility
-    
-    def __calculate_expected_returns(self) -> pd.DataFrame:
-        """
-        Calculates expected returns as the rolling mean of returns over the specified window J.
-        """
-        df_expected_returns = self.df_returns.rolling(window=self.J).mean()
-        return df_expected_returns.fillna(method='bfill')
 
     def get_data(self, K:int=1) -> dict:
         """
@@ -84,13 +76,11 @@ class Data:
                 px_volume = self.df_px_volume.loc[[date]].rename(index={date: nearest_date})
                 returns = self.df_returns.loc[[date]].rename(index={date: nearest_date})
                 volatility = self.df_volatility.loc[[date]].rename(index={date: nearest_date})
-                expected_returns = self.df_expected_returns.loc[[date]].rename(index={date: nearest_date})
 
                 tickers = self.df_compo[nearest_date].dropna().tolist()
                 data[nearest_date] = pd.concat([px_last.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: PX_LAST}), 
                                             px_volume.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: VOLUME}), 
-                                            returns.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: RETURNS}), 
-                                            volatility.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: VOLATILITY}), 
-                                            expected_returns.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: EXPECTED_RETURNS})]).T
-                data[nearest_date][RFR] = self.risk_free_rate
+                                            returns.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: RETURNS}),
+                                            volatility.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: VOLATILITY})]).T
+                data[nearest_date][RFR] = self.risk_free_rate 
         return data

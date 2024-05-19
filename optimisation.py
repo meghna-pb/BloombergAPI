@@ -1,11 +1,9 @@
 import pandas as pd
 import numpy as np
 
-from signals import RETURNS, WEIGHT, WEIGHTED_RETURNS, POSITION, LONG, SHORT, RETURNS
-from data import VOLATILITY, EXPECTED_RETURNS, RFR
+from signals import RETURNS, VOLUME, PX_LAST, WEIGHT, WEIGHTED_RETURNS, POSITION, LONG, SHORT, RETURNS, VOLATILITY, RFR
 
 DATES = "DATES"
-WEIGHTED_VOLATILITY = "WEIGHTED_VOLATILITY"
 
 
 class Optimisation:
@@ -36,29 +34,71 @@ class Optimisation:
                 ptf.loc[ptf[POSITION] == LONG, WEIGHT] =  1 / nb_long_shares if nb_long_shares != 0 else 0
                 ptf.loc[ptf[POSITION] == SHORT, WEIGHT] = - 1 / nb_short_shares if nb_short_shares != 0 else 0
                 ptf[WEIGHTED_RETURNS] = ptf[RETURNS] * ptf[WEIGHT]
-                ptf[WEIGHTED_VOLATILITY] = ptf[VOLATILITY] * ptf[WEIGHT]
         return portfolios
-    
+        
     @staticmethod
-    def get_scaling_weight(portfolios: dict) -> dict:
+    def get_volume_weight(portfolios: dict) -> dict:
         """
-        Adjust weights inversely proportional to the volatility of each position in the portfolio.
-        
+        Adjust weights based on the trading volume of each position in the portfolio, separately for long and short positions.
+    
         :param portfolios: Dictionary of portfolio data.
-        
-        :return: Updated dictionary with scaled weights based on volatility.
+    
+        :return: Updated dictionary with weights based on trading volume for both long and short positions.
         """
         for date in portfolios.keys():
             for name, ptf in portfolios[date].items():
-                ptf[WEIGHT] = 1 / ptf[VOLATILITY]
-        
-                long_weights = ptf[ptf[POSITION] == LONG][WEIGHT]
-                ptf.loc[ptf[POSITION] == LONG, WEIGHT] = long_weights / long_weights.sum()
-                short_weights = ptf[ptf[POSITION] == SHORT][WEIGHT]
-                ptf.loc[ptf[POSITION] == SHORT, WEIGHT] = -short_weights / short_weights.sum()
-
+                total_long_volume = ptf.loc[ptf[POSITION] == LONG, VOLUME].sum()
+                total_short_volume = ptf.loc[ptf[POSITION] == SHORT, VOLUME].sum()
+            
+                ptf.loc[ptf[POSITION] == LONG, WEIGHT] = ptf[VOLUME] / total_long_volume if total_long_volume != 0 else 0
+                ptf.loc[ptf[POSITION] == SHORT, WEIGHT] = -ptf[VOLUME] / total_short_volume if total_short_volume != 0 else 0
+            
                 ptf[WEIGHTED_RETURNS] = ptf[RETURNS] * ptf[WEIGHT]
-                ptf[WEIGHTED_VOLATILITY] = ptf[VOLATILITY] * ptf[WEIGHT]
+        return portfolios
+    
+    @staticmethod
+    def get_inverse_volatility_weight(portfolios: dict) -> dict:
+        """
+        Adjust weights inversely proportional to the volatility of each position in the portfolio, with normalization,
+        separately for long and short positions.
+    
+        :param portfolios: Dictionary of portfolio data.
+        :return: Updated dictionary with normalized inverse volatility weights for both long and short positions.
+        """
+        for date in portfolios.keys():
+            for name, ptf in portfolios[date].items():
+                long_inverse_volatility = 1 / ptf.loc[ptf[POSITION] == LONG, VOLATILITY]
+                short_inverse_volatility = 1 / ptf.loc[ptf[POSITION] == SHORT, VOLATILITY]
+            
+                total_long_inv_vol = long_inverse_volatility.sum()
+                total_short_inv_vol = short_inverse_volatility.sum()
+            
+                ptf.loc[ptf[POSITION] == LONG, WEIGHT] = long_inverse_volatility / total_long_inv_vol if total_long_inv_vol != 0 else 0
+                ptf.loc[ptf[POSITION] == SHORT, WEIGHT] = -short_inverse_volatility / total_short_inv_vol if total_short_inv_vol != 0 else 0
+            
+                ptf[WEIGHTED_RETURNS] = ptf[RETURNS] * ptf[WEIGHT]
+        return portfolios
+    
+    @staticmethod
+    def get_dollar_volume_weight(portfolios: dict) -> dict:
+        """
+        Adjust weights based on the dollar volume (price * volume) of each position, separately for long and short positions.
+    
+        :param portfolios: Dictionary of portfolio data.
+        :return: Updated dictionary with weights based on dollar volume for both long and short positions.
+        """
+        for date in portfolios.keys():
+            for name, ptf in portfolios[date].items():
+                long_dollar_volume = ptf.loc[ptf[POSITION] == LONG, PX_LAST] * ptf.loc[ptf[POSITION] == LONG, VOLUME]
+                short_dollar_volume = ptf.loc[ptf[POSITION] == SHORT, PX_LAST] * ptf.loc[ptf[POSITION] == SHORT, VOLUME]
+            
+                total_long_dollar_vol = long_dollar_volume.sum()
+                total_short_dollar_vol = short_dollar_volume.sum()
+            
+                ptf.loc[ptf[POSITION] == LONG, WEIGHT] = long_dollar_volume / total_long_dollar_vol if total_long_dollar_vol != 0 else 0
+                ptf.loc[ptf[POSITION] == SHORT, WEIGHT] = -short_dollar_volume / total_short_dollar_vol if total_short_dollar_vol != 0 else 0
+            
+                ptf[WEIGHTED_RETURNS] = ptf[RETURNS] * ptf[WEIGHT]
         return portfolios
     
     @staticmethod
@@ -72,7 +112,7 @@ class Optimisation:
         """
         for date in portfolios.keys():
             for name, ptf in portfolios[date].items():
-                sharpe_ratios = (ptf[EXPECTED_RETURNS] - ptf[RFR]) / (ptf[VOLATILITY] + 1e-6)
+                sharpe_ratios = (ptf[RETURNS] - ptf[RFR]) / ptf[RETURNS].std()
                 sharpe_ratios = sharpe_ratios.replace([np.inf, -np.inf, np.nan], 0)
 
                 long_weights = sharpe_ratios[ptf[POSITION] == LONG]
@@ -81,7 +121,6 @@ class Optimisation:
                 ptf.loc[ptf[POSITION] == SHORT, WEIGHT] = -(abs(short_weights) / abs(short_weights).sum())
 
                 ptf[WEIGHTED_RETURNS] = ptf[RETURNS] * ptf[WEIGHT]
-                ptf[WEIGHTED_VOLATILITY] = ptf[VOLATILITY] * ptf[WEIGHT]
         return portfolios
     
     
@@ -94,7 +133,7 @@ class Optimisation:
         
         :return: Tuple containing summed weighted returns and summed weighted volatility.
         """
-        return dated_portfolio[WEIGHTED_RETURNS].sum(), dated_portfolio[WEIGHTED_VOLATILITY].sum()
+        return dated_portfolio[WEIGHTED_RETURNS].sum()
     
     def get_full_results(self, portfolios:dict) -> dict:
         """
@@ -104,14 +143,15 @@ class Optimisation:
         
         :return: Dictionary keyed by portfolio name with DataFrames containing cumulative returns and volatility data.
         """
+    
         dict_returns = {}
         for date, ptf in portfolios.items():
             for key, portfolio_df in ptf.items():
-                full_returns, full_volatility = self.__get_dated_results(portfolio_df)
+                full_returns = self.__get_dated_results(portfolio_df)
                 if key not in dict_returns:
-                    dict_returns[key] = pd.DataFrame(columns=[DATES, RETURNS, VOLATILITY])
-                new_data = pd.DataFrame({DATES: [date], RETURNS: [full_returns], VOLATILITY: [full_volatility]})
+                    dict_returns[key] = pd.DataFrame(columns=[DATES, RETURNS]).set_index(DATES)
+                new_data = pd.DataFrame({DATES: [date], RETURNS: [full_returns]}).set_index(DATES)
                 dict_returns[key] = dict_returns[key].dropna(axis=1, how='all')
-                dict_returns[key] = pd.concat([dict_returns[key], new_data], ignore_index=True)
+                dict_returns[key] = pd.concat([dict_returns[key], new_data], ignore_index=False)
         return dict_returns
 
