@@ -8,8 +8,6 @@ TRAITEMENT DES DONNEES (data.py) :
 - Calcul des rendements (full periode) 				-> OK
 - Calcul des volatilités (full periode) 			-> OK
 - Création de dictionnaires par date 				-> OK
-- Retraitement des entreprises ? 				-> NOK
-
 
 CLASSEMENT DES DONNEES (signal.py) : 
 - Classement des données (returns et volume) 			-> OK
@@ -23,16 +21,24 @@ PONDERATION DES PORTEFEUILLES (optimisation.py) :
 - Calcul des poids selon volatilité 				-> OK
 - Calcul des poids selon ratio de sharpe 
 Rq : Appels de la classe perf pour meilleure pondération ?
+--> trouver meilleure pondé qui max rdt et min risque (C)
 
+TEST DE PERFORMANCE (performance.py) : --> finir
+- Calcul de la tracking error -> (M) rajouter le benchmark Russell, compo en équipondéré
+- Calcul du ratio de sharpe -> done
+- Calcul de la Value at Risk -> done
+- Calcul des performances -> done
+- Graphiques des performances (+ perf cumulées) -> done 
+- Calcul de la t-stat pour tous les résultats  -> **TO DO** (M)
 
-TEST DE PERFORMANCE (performance.py) : 
-- Calcul de la tracking error 
-- Calcul du ratio de sharpe 
-- Calcul de la Value at Risk 
-- Calcul des performances 
-- Graphiques des performances (+ perf cumulées) 
-- Calcul de la t-stat pour tous les résultats  
+UI : Meghna 
+-> dashboard
 
+Verification des résultats: (C)
+PORT --> mettre le ticker + poids 
+pour 2 années test, on sort la compo et on fait holding period de 12 mois
+
+Des deux côtés: pourquoi perf nulles? cf fonction intersec
 
 Résumé process : 
 1) Calcul des rendements sur toute les données (par date) 
