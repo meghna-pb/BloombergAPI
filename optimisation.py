@@ -99,30 +99,7 @@ class Optimisation:
                 ptf.loc[ptf[POSITION] == SHORT, WEIGHT] = -short_dollar_volume / total_short_dollar_vol if total_short_dollar_vol != 0 else 0
             
                 ptf[WEIGHTED_RETURNS] = ptf[RETURNS] * ptf[WEIGHT]
-        return portfolios
-    
-    @staticmethod
-    def get_sharpe_weight(portfolios: dict) -> dict:
-        """
-        Assign weights based on the Sharpe ratio, considering both expected returns and volatility.
-        
-        :param portfolios: Dictionary of portfolio data.
-        
-        :return: Updated dictionary with weights calculated from Sharpe ratios.
-        """
-        for date in portfolios.keys():
-            for name, ptf in portfolios[date].items():
-                sharpe_ratios = (ptf[RETURNS] - ptf[RFR]) / ptf[RETURNS].std()
-                sharpe_ratios = sharpe_ratios.replace([np.inf, -np.inf, np.nan], 0)
-
-                long_weights = sharpe_ratios[ptf[POSITION] == LONG]
-                ptf.loc[ptf[POSITION] == LONG, WEIGHT] = long_weights / long_weights.sum()
-                short_weights = sharpe_ratios[ptf[POSITION] == SHORT]
-                ptf.loc[ptf[POSITION] == SHORT, WEIGHT] = -(abs(short_weights) / abs(short_weights).sum())
-
-                ptf[WEIGHTED_RETURNS] = ptf[RETURNS] * ptf[WEIGHT]
-        return portfolios
-    
+        return portfolios    
     
     @staticmethod
     def __get_dated_results(dated_portfolio: pd.DataFrame) -> float:

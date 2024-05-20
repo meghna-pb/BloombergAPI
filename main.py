@@ -4,8 +4,6 @@ from optimisation import Optimisation
 from performance import Performance
 from charts import Charts
 
-# import pandas as pd
-
 """ 
 Explication des étapes : 
 
@@ -55,9 +53,6 @@ def test(J, K, n, m, risk_free_rate, ponderation_method) :
     elif ponderation_method == "vol" :
         weighted_returns = optim.get_inverse_volatility_weight(simple_returns.copy())
         weighted_volume = optim.get_inverse_volatility_weight(simple_volume.copy())
-    elif ponderation_method == "sharpe" :
-        weighted_returns = optim.get_sharpe_weight(simple_returns.copy())
-        weighted_volume = optim.get_sharpe_weight(simple_volume.copy())
     elif ponderation_method == "volume":
         weighted_returns = optim.get_volume_weight(simple_returns.copy())
         weighted_volume = optim.get_volume_weight(simple_volume.copy())
@@ -80,7 +75,6 @@ def test(J, K, n, m, risk_free_rate, ponderation_method) :
     
 # test(J=3, K=3, n=2, m=2, risk_free_rate=0.2, ponderation_method="equi") # -> OK
 test(J=3, K=3, n=7, m=5, risk_free_rate=0.2, ponderation_method="vol") # -> OK
-# test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="sharpe") # -> Nooooooooooooooooooooooo
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="volume") # -> OK
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="volumexprice") # -> OK
 
