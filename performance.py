@@ -5,16 +5,43 @@ from optimisation import DATES, RETURNS, WEIGHT
 
 SHARPE_RATIO = "SHARPE_RATIO"
 
-
 class Performance: 
-    def __init__(self, portfolios):
+    def __init__(self, portfolios, bench):
         """
         Initialize the Performance class with portfolio data.
         
         :param portfolio: DataFrame with portfolio data, including columns ['RETURNS', 'VOLATILITY']
         """
         self.portfolios = portfolios
-  
+        self.bench = bench
+
+    def compute_t_stat(self):
+        # Initialize a dictionary to store t-stats for each portfolio
+        t_stats = {}
+
+        # Loop through each portfolio
+        for portfolio_name, data in self.portfolios.items():
+
+            # Assuming 'DATES' in portfolio and indexing benchmarks by date
+            benchmark_subset =  self.bench[data.index]
+
+            # Calculate differences in returns
+            differences = data['RETURNS'] - benchmark_subset['WEIGHTED_RETURNS']
+
+            # Calculate mean and standard deviation of differences
+            mean_diff = differences.mean()
+            std_dev_diff = differences.std()
+            n = differences.count()  # number of non-NA observations
+
+            # Calculate t-statistic
+            if std_dev_diff > 0 and n > 1:  # to avoid division by zero
+                t_stat = mean_diff / (std_dev_diff / np.sqrt(n))
+                t_stats[portfolio_name] = t_stat
+            else:
+                t_stats[portfolio_name] = None
+
+        return t_stats
+
     def overall_performance(self) -> dict:  
         """
         Calculate the overall performance for each portfolio by computing the total compounded return from all periods.
@@ -110,6 +137,6 @@ class Performance:
         """
         results = {}
         for key, data in self.portfolios.items():
-            results[key] = (data[RETURNS] - benchmark_returns[RETURNS]).std()
+            results[key] = (data[RETURNS] - self.bench[key][RETURNS]).std()
         return results
         #### AI BESOIN D'UN BENCHMARK POUR TESTER 

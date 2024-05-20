@@ -44,7 +44,7 @@ Remarques : Chaque portefeuille est déja pondéré, la pondération du ptf croi
 
 def test(J, K, n, m, risk_free_rate, ponderation_method) :
     data = Data(path="Data", J=J, risk_free_rate=risk_free_rate) 
-    
+    bench = data.get_benchmark()
     signal = Signal(data=data, K=K, n_returns=n, m_volume=m)
     simple_returns, simple_volume = signal.create_simple_portfolios()
     
@@ -68,8 +68,9 @@ def test(J, K, n, m, risk_free_rate, ponderation_method) :
     intersection = signal.create_intersected_portfolios(returns_ptf=weighted_returns, volume_ptf=weighted_volume)
     full_results = optim.get_full_results(intersection)
 
-    # # perf = Performance(portfolios=full_results)
-    
+    perf = Performance(portfolios=full_results, bench=bench)
+    print(perf.compute_t_stat())
+    quit()
     charts = Charts(portfolios=full_results)
     charts.viewer(portfolio_keys=None)
     # charts.cumulative_viewer(portfolio_keys=None)

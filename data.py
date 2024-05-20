@@ -1,7 +1,6 @@
 import pandas as pd
 
-VOLUME, PX_LAST, RETURNS, VOLATILITY, RFR = "PX_VOLUME", "PX_LAST", "RETURNS", "VOLATILITY", "RFR"
-
+VOLUME, PX_LAST, RETURNS, VOLATILITY, RFR, WEIGHT, WEIGHTED_RETURNS = "PX_VOLUME", "PX_LAST", "RETURNS", "VOLATILITY", "RFR", "WEIGHT", "WEIGHTED_RETURNS"
 class Data:
     def __init__(self, path="", J=3, risk_free_rate:float=0.2) -> None:
         """
@@ -83,4 +82,29 @@ class Data:
                                             returns.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: RETURNS}),
                                             volatility.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: VOLATILITY})]).T
                 data[nearest_date][RFR] = self.risk_free_rate 
+        return data
+
+    def get_benchmark(self):
+        data = {}
+        for date in self.df_returns.index:
+            nearest_date = min(pd.to_datetime(self.df_compo.columns), key=lambda x: abs(x - pd.to_datetime(date)))            
+            px_last = self.df_px_last.loc[[date]].rename(index={date: nearest_date})
+            px_volume = self.df_px_volume.loc[[date]].rename(index={date: nearest_date})
+            returns = self.df_returns.loc[[date]].rename(index={date: nearest_date})
+            volatility = self.df_volatility.loc[[date]].rename(index={date: nearest_date})
+            tickers = self.df_compo[nearest_date].dropna().tolist()
+            data[nearest_date] = pd.concat([px_last.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: PX_LAST}), 
+                                        px_volume.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: VOLUME}), 
+                                        returns.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: RETURNS}),
+                                        volatility.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: VOLATILITY})]).T
+            data[nearest_date][RFR] = self.risk_free_rate
+
+            # Calculate equally distributed weights
+            if len(tickers) > 0:
+                equal_weight = 1 / len(tickers)
+            else:
+                equal_weight = 0
+            data[nearest_date][WEIGHT] = equal_weight
+
+            data[nearest_date][WEIGHTED_RETURNS] = data[nearest_date][WEIGHT] * data[nearest_date][RETURNS]
         return data
