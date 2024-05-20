@@ -19,13 +19,10 @@ class Performance:
         # Initialize a dictionary to store t-stats for each portfolio
         t_stats = {}
 
-        # Loop through each portfolio
         for portfolio_name, data in self.portfolios.items():
-
             # Assuming 'DATES' in portfolio and indexing benchmarks by date
-            benchmark_subset =  self.bench[data.index]
+            benchmark_subset = self.bench.loc[self.bench.index.isin(data.index)]
 
-            # Calculate differences in returns
             differences = data['RETURNS'] - benchmark_subset['WEIGHTED_RETURNS']
 
             # Calculate mean and standard deviation of differences
@@ -136,7 +133,7 @@ class Performance:
             # * np.sqrt(12) ? je sais jamais ou il faut le mettre 
         return results
     
-    def tracking_error(self, benchmark_returns):
+    def tracking_error(self):
         """
         Calculate the tracking error against a benchmark for each portfolio. 
     
@@ -145,7 +142,7 @@ class Performance:
         :return: A dictionary with tracking error values for each portfolio.
         """
         results = {}
-        for key, data in self.portfolios.items():
-            results[key] = (data[RETURNS] - self.bench[key][RETURNS]).std()
+        for portfolio_name, data in self.portfolios.items():
+            benchmark_subset = self.bench.loc[self.bench.index.isin(data.index)]
+            results[portfolio_name] = (data[RETURNS] - benchmark_subset['WEIGHTED_RETURNS']).std()
         return results
-        #### AI BESOIN D'UN BENCHMARK POUR TESTER 

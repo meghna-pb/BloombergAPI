@@ -68,18 +68,18 @@ def test(J, K, n, m, risk_free_rate, ponderation_method) :
     intersection = signal.create_intersected_portfolios(returns_ptf=weighted_returns, volume_ptf=weighted_volume)
     full_results = optim.get_full_results(intersection)
 
-    perf = Performance(portfolios=full_results, bench=bench)
-    print(perf.compute_t_stat())
-    quit()
-    charts = Charts(portfolios=full_results)
-    charts.viewer(portfolio_keys=None)
+    # perf = Performance(portfolios=full_results, bench=bench)
+    # print(perf.tracking_error())
+    charts = Charts(portfolios=full_results, bench=bench)
+    # charts.viewer(portfolio_keys=None)
+    charts.get_figures("Tracking Error")
     # charts.cumulative_viewer(portfolio_keys=None)
-    print(charts.get_figures()) # portfolio_keys=['R1_V1', 'R2_V1', 'R1_V2', 'R2_V2'])
+    # print(charts.get_table()) # portfolio_keys=['R1_V1', 'R2_V1', 'R1_V2', 'R2_V2'])
 
     
     
 # test(J=3, K=3, n=2, m=2, risk_free_rate=0.2, ponderation_method="equi") # -> OK
-test(J=3, K=3, n=2, m=2, risk_free_rate=0.2, ponderation_method="vol") # -> OK
+test(J=3, K=3, n=7, m=5, risk_free_rate=0.2, ponderation_method="vol") # -> OK
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="sharpe") # -> Nooooooooooooooooooooooo
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="volume") # -> OK
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="volumexprice") # -> OK
