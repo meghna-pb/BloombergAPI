@@ -2,9 +2,10 @@ import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
 
-from data import Data, RETURNS, VOLUME, PX_LAST, VOLATILITY, RFR
+from data import Data, RETURNS, VOLUME, PX_LAST, VOLATILITY
 WEIGHT, WEIGHTED_RETURNS = "WEIGHT", "WEIGHTED_RETURNS"
 POSITION, LONG, SHORT = "POSITION", "LONG", "SHORT"
+DATES = "DATES"
 
 class Signal:
     def __init__(self, data:Data, K:int=1, n_returns:int=5, m_volume:int=3):

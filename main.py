@@ -1,8 +1,10 @@
 from data import Data
 from signals import Signal
-from optimisation import Optimisation
+from optimisation import Optimisation, WEIGHT
 from performance import Performance
 from charts import Charts
+
+import pandas as pd
 
 """ 
 Explication des étapes : 
@@ -37,16 +39,40 @@ Remarques : Chaque portefeuille est déja pondéré, la pondération du ptf croi
 
 """
 
+def export_to_excel(intersected_portfolios, filename="inputs_port.xlsx"):
+    """
+    Export all intersected portfolios to a single Excel sheet.
+    
+    :param intersected_portfolios: Dictionary of intersected portfolios.
+    :param filename: The filename for the resulting Excel file.
+    """
+    combined_data = pd.DataFrame()
+    
+    for date, portfolios in intersected_portfolios.items():
+        for ptf_name, ptf_data in portfolios.items():
+            temp_df = pd.DataFrame()
+            temp_df['Date'] = [date.strftime('%d/%m/%Y')] * len(ptf_data)  
+            temp_df['SECURITY_ID'] = ptf_data.index  
+            temp_df['QUANTITY'] = ptf_data[WEIGHT].values
+            temp_df['PORTFOLIO NAME'] = ptf_name 
+            combined_data = pd.concat([combined_data, temp_df], ignore_index=True)
+    
+    combined_data.to_excel(filename, index=False)
+
 
 ##### Fonction de test : ####
 
 def test(J, K, n, m, risk_free_rate, ponderation_method) :
     data = Data(path="Data", J=J, risk_free_rate=risk_free_rate) 
     bench = data.get_benchmark()
+    rfr = 0.2
+    
     signal = Signal(data=data, K=K, n_returns=n, m_volume=m)
     simple_returns, simple_volume = signal.create_simple_portfolios()
     
-    optim = Optimisation(returns_portfolios=simple_returns, volume_portfolios=simple_volume)
+    optim = Optimisation(returns_portfolios=simple_returns, 
+                         volume_portfolios=simple_volume,
+                         risk_free_rate=rfr)
     if ponderation_method == "equi" :
         weighted_returns = optim.get_equal_weight(simple_returns.copy())
         weighted_volume = optim.get_equal_weight(simple_volume.copy())
@@ -59,33 +85,27 @@ def test(J, K, n, m, risk_free_rate, ponderation_method) :
     elif ponderation_method == "volumexprice":
         weighted_returns = optim.get_dollar_volume_weight(simple_returns.copy())
         weighted_volume = optim.get_dollar_volume_weight(simple_volume.copy())
+    elif ponderation_method == "best" :
+        weighted_returns = optim.get_best_weighting_method(simple_returns.copy())
+        weighted_volume = optim.get_best_weighting_method(simple_volume.copy())
     
     intersection = signal.create_intersected_portfolios(returns_ptf=weighted_returns, volume_ptf=weighted_volume)
+    export_to_excel(intersection)
     full_results = optim.get_full_results(intersection)
 
-    # perf = Performance(portfolios=full_results, bench=bench)
-    # print(perf.tracking_error())
-    charts = Charts(portfolios=full_results, bench=bench)
+    # charts = Charts(portfolios=full_results, bench=bench, risk_free_rate=rfr, confidence_level=0.05)
+    # charts.get_figures("Tracking Error")
     # charts.viewer(portfolio_keys=None)
-    charts.get_figures("Tracking Error")
     # charts.cumulative_viewer(portfolio_keys=None)
     # print(charts.get_table()) # portfolio_keys=['R1_V1', 'R2_V1', 'R1_V2', 'R2_V2'])
 
     
-    
+# test(J=3, K=3, n=5, m=3, risk_free_rate=0.2, ponderation_method="best") # -> OK
 # test(J=3, K=3, n=2, m=2, risk_free_rate=0.2, ponderation_method="equi") # -> OK
 test(J=3, K=3, n=7, m=5, risk_free_rate=0.2, ponderation_method="vol") # -> OK
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="volume") # -> OK
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="volumexprice") # -> OK
 
 
-""" 
-Les résultats pour toute les métriques sont atroces, je pense faut vraiment revoir la création des ptf :(
-    (surtout les 3 premiers ptf)
-    
-Les portefeuilles avec pondération sharpe sont attroces, je propose qu'on les enlève...  
-Par contre ma fonction qui cherche la meilleure pondération je peux la faire en maximisant le ratio de sharpe (calculé dans les perf) ?  
 
-Ducoup j'ai rajouté d'autre pondérations un peu bateau 
-"""
-
+### Vérifier les perfs annualisées ? 
