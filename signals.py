@@ -88,23 +88,23 @@ class Signal:
     
         for date in self.data.keys():
             dict_intersections[date] = {}
-            try :
-                for R_i, R_portfolio in returns_ptf[date].items():
-                    for V_j, V_portfolio in volume_ptf[date].items():
-                        if not WEIGHT in R_portfolio.columns or not WEIGHT in V_portfolio.columns:
-                            raise ("Intersected portfolios requires asset weighting")
+            for R_i, R_portfolio in returns_ptf[date].items():
+                for V_j, V_portfolio in volume_ptf[date].items():
+                    if not WEIGHT in R_portfolio.columns or not WEIGHT in V_portfolio.columns:
+                        raise ("Intersected portfolios requires asset weighting")
+                    intersection_index = R_portfolio.index.intersection(V_portfolio.index)
                     
-                        intersection_index = R_portfolio.index.intersection(V_portfolio.index)
-                        intersected_portfolio = pd.concat([R_portfolio.loc[intersection_index], R_portfolio.loc[intersection_index, :]])
-
-                        intersected_portfolio[WEIGHT] = R_portfolio.loc[intersection_index, WEIGHT] + V_portfolio.loc[intersection_index, WEIGHT]
-                        intersected_portfolio[WEIGHTED_RETURNS] = R_portfolio.loc[intersection_index, WEIGHTED_RETURNS] + V_portfolio.loc[intersection_index, WEIGHTED_RETURNS]
-                        intersected_portfolio.drop(POSITION, axis=1, inplace=True)
+                    # intersected_portfolio = pd.concat([R_portfolio.loc[intersection_index],  V_portfolio.loc[intersection_index]])
+                    # intersected_portfolio[WEIGHT] = R_portfolio.loc[intersection_index, WEIGHT] + V_portfolio.loc[intersection_index, WEIGHT]
+                    # intersected_portfolio[WEIGHTED_RETURNS] = R_portfolio.loc[intersection_index, WEIGHTED_RETURNS] + V_portfolio.loc[intersection_index, WEIGHTED_RETURNS]
+                    # intersected_portfolio.drop(POSITION, axis=1, inplace=True)
                     
-                        dict_intersections[date][f'{R_i}_{V_j}'] = intersected_portfolio
-            except KeyError:
-                print(date)
-                continue
+                    intersected_portfolio = R_portfolio.loc[intersection_index].copy()
+                    intersected_portfolio[WEIGHT] = R_portfolio[WEIGHT] + V_portfolio.loc[intersection_index, WEIGHT]
+                    intersected_portfolio[WEIGHTED_RETURNS] = (R_portfolio.loc[intersection_index, WEIGHTED_RETURNS] +
+                                                                    V_portfolio.loc[intersection_index, WEIGHTED_RETURNS])
+                    
+                    dict_intersections[date][f'{R_i}_{V_j}'] = intersected_portfolio
                     
         self.intersected_portfolios = dict_intersections
         return self.intersected_portfolios

@@ -53,6 +53,15 @@ class Performance:
             dict_results[key] = round(((data[RETURNS] + 1).cumprod().iloc[-1] - 1), 2)
         return dict_results
     
+        # dict_results = {}
+        # for key, data in self.portfolios.items():
+        #     log_returns = np.log1p(data[RETURNS])  
+        #     total_log_return = log_returns.sum()
+        #     compounded_return = np.expm1(total_log_return)  
+            
+        #     dict_results[key] = round(compounded_return, 2)
+        # return dict_results
+    
     def annualized_performance(self) -> dict:
         """
         Calculate the annualized performance for each portfolio based on the total compounded return and the number of periods.

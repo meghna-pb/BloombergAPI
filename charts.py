@@ -3,7 +3,7 @@ from typing import Union, List
 import plotly.graph_objects as go
 
 from performance import Performance, RETURNS
-RETURNS = "WEIGHTED_RETURNS"
+# RETURNS = "WEIGHTED_RETURNS"
 
 class Charts(Performance):
     def __init__(self, portfolios):
