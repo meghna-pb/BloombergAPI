@@ -323,37 +323,72 @@ class BLP():
      
 blp = BLP()
 
-# Dates : 
-start_date = datetime(2024, 1, 28) # datetime(1999, 1, 28)
-end_date = datetime.now()
-dates_list = [start_date + i * timedelta(days=30) for i in range((end_date - start_date).days // 30 + 1)]
+# # Dates : 
+# start_date = datetime(2024, 1, 28) # datetime(1999, 1, 28)
+# end_date = datetime.now()
+# dates_list = [start_date + i * timedelta(days=30) for i in range((end_date - start_date).days // 30 + 1)]
 
-##### Index compositions: #####
+# ##### Index compositions: #####
 
-strFields = ["INDX_MWEIGHT_HIST"]  
-tickers = ["RIY Index"] # RUSSEL
-df_compo = pd.DataFrame()
+# strFields = ["INDX_MWEIGHT_HIST"]  
+# tickers = ["RIY Index"] # RUSSEL
+# df_compo = pd.DataFrame()
 
-for date in dates_list :
-    results = blp.bds(strSecurity=tickers, strFields=strFields, snapshot_date=date)
-    new_column = results[tickers[0]]
-    new_column = new_column[~new_column[date].astype(str).apply(lambda x: any(char.isdigit() for char in x))]
-    df_compo[date] = new_column[date]
+# for date in dates_list :
+#     results = blp.bds(strSecurity=tickers, strFields=strFields, snapshot_date=date)
+#     new_column = results[tickers[0]]
+#     new_column = new_column[~new_column[date].astype(str).apply(lambda x: any(char.isdigit() for char in x))]
+#     df_compo[date] = new_column[date]
 
-# Flatten tickers (to have a unique list of tickers for all dates):
-flattened_data = df_compo.values.ravel()
-flattened_data_unique = list(set(flattened_data))
-list_tickers = [str(ticker) + " Equity" for ticker in flattened_data_unique]
+# # Flatten tickers (to have a unique list of tickers for all dates):
+# flattened_data = df_compo.values.ravel()
+# flattened_data_unique = list(set(flattened_data))
+# list_tickers = [str(ticker) + " Equity" for ticker in flattened_data_unique]
 
-##### Data : #####
+# ##### Data : #####
 
-tickers = list_tickers
-strFields = ["PX_LAST", "PX_VOLUME"] 
-# strFields = ["RETURN_COM_EQY", "PE_RATIO", "EARN_YLD", "TURNOVER", "CUR_MKT_CAP", "NORMALIZED_ROE", "EQY_TURNOVER_REALTIME", "EQY_FLOAT"]
+# tickers = list_tickers
+# strFields = ["PX_LAST", "PX_VOLUME"] 
+# # strFields = ["RETURN_COM_EQY", "PE_RATIO", "EARN_YLD", "TURNOVER", "CUR_MKT_CAP", "NORMALIZED_ROE", "EQY_TURNOVER_REALTIME", "EQY_FLOAT"]
 
-dict_data = blp.bdh(strSecurity=tickers, strFields=strFields, startdate=start_date, enddate=end_date, per='MONTHLY', curr="USD")
+# dict_data = blp.bdh(strSecurity=tickers, strFields=strFields, startdate=start_date, enddate=end_date, per='MONTHLY', curr="USD")
 
-blp.closeSession()
+
+def fetch_bloomberg_data(start_date, end_date, index_ticker, data_fields = ["PX_LAST", "PX_VOLUME"]):
+    # Generate a list of dates in monthly intervals
+    dates_list = [start_date + i * timedelta(days=30) for i in range((end_date - start_date).days // 30 + 1)]
+    
+    strFields_compo = ["INDX_MWEIGHT_HIST"]  
+    tickers = [index_ticker]
+    df_compo = pd.DataFrame()
+
+    for date in dates_list:
+        # Fetch index compositions for each date
+        results = blp.bds(strSecurity=tickers, strFields=strFields_compo, snapshot_date=date)
+        new_column = results[tickers[0]]
+        # Filter out entries where the column has digits
+        new_column = new_column[~new_column[date].astype(str).apply(lambda x: any(char.isdigit() for char in x))]
+        df_compo[date] = new_column[date]
+
+    # Flatten tickers to get a unique list for all dates
+    flattened_data = df_compo.values.ravel()
+    flattened_data_unique = list(set(flattened_data))
+    list_tickers = [str(ticker) + " Equity" for ticker in flattened_data_unique]
+
+    # Fetch data for the tickers
+    tickers = list_tickers
+    dict_data = blp.bdh(strSecurity=tickers, strFields=data_fields, startdate=start_date, enddate=end_date, per='MONTHLY', curr="USD")
+    blp.closeSession() ### on le met ici ??
+
+    return dict_data, df_compo
+
+# # Usage
+# start_date = datetime(2024, 1, 28)
+# end_date = datetime.now()
+# index_ticker = "RIY Index"  # RUSSEL
+# data_fields = ["PX_LAST", "PX_VOLUME"] 
+
+# dict_data, df_compo = fetch_bloomberg_data(start_date, end_date, index_ticker, data_fields)
 
 
 ## Conversion to Excel Files: 

@@ -1,8 +1,10 @@
 import pandas as pd
+from datetime import datetime
 
 VOLUME, PX_LAST, RETURNS, VOLATILITY, RFR, WEIGHT, WEIGHTED_RETURNS = "PX_VOLUME", "PX_LAST", "RETURNS", "VOLATILITY", "RFR", "WEIGHT", "WEIGHTED_RETURNS"
 class Data:
-    def __init__(self, path="", J=3, risk_free_rate:float=0.2) -> None:
+    def __init__(self, path="", J=3, risk_free_rate:float=0.2, index_ticker = 'RIY Index', 
+                 start_date = datetime(2024, 1, 28), end_date = datetime.now()) -> None:
         """
         Initialize the Data class with the option to load data from a specified path or use predefined Bloomberg data.
         
@@ -10,12 +12,13 @@ class Data:
         :param J: Number of periods used for calculating rolling statistics such as volatility and expected returns.
         :param risk_free_rate: The risk-free rate used in financial calculations.
         """
-        
+
         self.J = J  
         self.risk_free_rate = risk_free_rate
         
         if path == "":
-            from bloomberg import df_compo, dict_data
+            from bloomberg import fetch_bloomberg_data
+            dict_data, df_compo = fetch_bloomberg_data(start_date, end_date, index_ticker)
             self.df_compo = df_compo
             self.df_px_last = dict_data[PX_LAST].sort_index()
             self.df_px_volume = dict_data[VOLUME].sort_index()

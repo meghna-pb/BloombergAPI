@@ -42,8 +42,8 @@ Remarques : Chaque portefeuille est déja pondéré, la pondération du ptf croi
 
 ##### Fonction de test : ####
 
-def test(J, K, n, m, risk_free_rate, ponderation_method) :
-    data = Data(path="Data", J=J, risk_free_rate=risk_free_rate) 
+def test(path, J, K, n, m, risk_free_rate, ponderation_method) :
+    data = Data(path=path, J=J, risk_free_rate=risk_free_rate) 
     bench = data.get_benchmark()
     signal = Signal(data=data, K=K, n_returns=n, m_volume=m)
     simple_returns, simple_volume = signal.create_simple_portfolios()
@@ -77,9 +77,70 @@ def test(J, K, n, m, risk_free_rate, ponderation_method) :
     # print(charts.get_table()) # portfolio_keys=['R1_V1', 'R2_V1', 'R1_V2', 'R2_V2'])
 
     
+def test2(path, J, K, n, m, risk_free_rate, ponderation_method) :
+    data = Data(path=path, J=J, risk_free_rate=risk_free_rate) 
+    bench = data.get_benchmark()
+    signal = Signal(data=data, K=K, n_returns=n, m_volume=m)
+    simple_returns, simple_volume = signal.create_simple_portfolios()
     
+    optim = Optimisation(returns_portfolios=simple_returns, volume_portfolios=simple_volume)
+    ponderation_methods = {"equi": optim.get_equal_weight,
+                           "vol": optim.get_inverse_volatility_weight,
+                           "sharpe": optim.get_sharpe_weight,
+                           "volume": optim.get_volume_weight,
+                           "volumexprice": optim.get_dollar_volume_weight}
+
+    if ponderation_method in ponderation_methods:
+        weight_function = ponderation_methods[ponderation_method]
+        weighted_returns = weight_function(simple_returns.copy())
+        weighted_volume = weight_function(simple_volume.copy())
+    else:
+        raise ValueError(f"Invalid ponderation method: {ponderation_method}")
+    intersection = signal.create_intersected_portfolios(returns_ptf=weighted_returns, volume_ptf=weighted_volume)
+    full_results = optim.get_full_results(intersection)
+
+    # perf = Performance(portfolios=full_results, bench=bench)
+    # print(perf.tracking_error())
+    charts = Charts(portfolios=full_results, bench=bench)
+    # charts.viewer(portfolio_keys=None)
+    charts.get_figures("Tracking Error")
+    # charts.cumulative_viewer(portfolio_keys=None)
+    # print(charts.get_table()) # portfolio_keys=['R1_V1', 'R2_V1', 'R1_V2', 'R2_V2'])
+
+def test_st(data, K, n, m, ponderation_method, viewer, method = None) :
+    bench = data.get_benchmark()
+    signal = Signal(data=data, K=K, n_returns=n, m_volume=m)
+    simple_returns, simple_volume = signal.create_simple_portfolios()
+    
+    optim = Optimisation(returns_portfolios=simple_returns, volume_portfolios=simple_volume)
+    ponderation_methods = {"equi": optim.get_equal_weight,
+                           "vol": optim.get_inverse_volatility_weight,
+                           "sharpe": optim.get_sharpe_weight,
+                           "volume": optim.get_volume_weight,
+                           "volumexprice": optim.get_dollar_volume_weight}
+
+    if ponderation_method in ponderation_methods:
+        weight_function = ponderation_methods[ponderation_method]
+        weighted_returns = weight_function(simple_returns.copy())
+        weighted_volume = weight_function(simple_volume.copy())
+    else:
+        raise ValueError(f"Invalid ponderation method: {ponderation_method}")
+    intersection = signal.create_intersected_portfolios(returns_ptf=weighted_returns, volume_ptf=weighted_volume)
+    full_results = optim.get_full_results(intersection)
+
+    charts = Charts(portfolios=full_results, bench=bench)
+    if viewer == "perf":
+        charts.viewer(portfolio_keys=None)
+    elif  viewer == "hist":
+        charts.get_figures(method)
+    elif viewer == "cumulative_v":
+        charts.cumulative_viewer(portfolio_keys=None)
+    # print(charts.get_table()) # portfolio_keys=['R1_V1', 'R2_V1', 'R1_V2', 'R2_V2'])
+
+# test_st(path="Data", J=3, K=3, n=7, m=5, risk_free_rate=0.2, ponderation_method="vol", method = "Tracking Error") # -> OK
+
 # test(J=3, K=3, n=2, m=2, risk_free_rate=0.2, ponderation_method="equi") # -> OK
-test(J=3, K=3, n=7, m=5, risk_free_rate=0.2, ponderation_method="vol") # -> OK
+# test(path="Data", J=3, K=3, n=7, m=5, risk_free_rate=0.2, ponderation_method="vol") # -> OK
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="sharpe") # -> Nooooooooooooooooooooooo
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="volume") # -> OK
 # test(J=3, K=3, n=3, m=2, risk_free_rate=0.2, ponderation_method="volumexprice") # -> OK
