@@ -3,14 +3,18 @@ from typing import Union, List
 import plotly.graph_objects as go
 
 from performance import Performance, RETURNS
-# RETURNS = "WEIGHTED_RETURNS"
 
 class Charts(Performance):
-    def __init__(self, portfolios, bench):
+    """This class is designed to generate visual representations of portfolio performance metrics."""
+    
+    def __init__(self, portfolios:dict, bench:pd.DataFrame, risk_free_rate:float=0.2, confidence_level:float=0.05):
         """
-        Initialize the Charts class which inherits from the Performance class.
+        Initialize the Charts class which inherits from the Performance class. 
         
-        :param portfolio: DataFrame with portfolio data, including columns ['RETURNS', 'VOLATILITY']
+        :param portfolios: Dictionary containing portfolio data, where each key is a portfolio name, and each value is a DataFrame that should contain at least the columns ['RETURNS', 'VOLATILITY'].
+        :param bench: DataFrame containing benchmark data, used for calculating comparative performance metrics. It should contain at least a 'RETURNS' column that corresponds to the benchmark returns.
+        :param risk_free_rate: The risk-free rate to be used in financial calculations such as the Sharpe Ratio. The default value is 0.2.
+        :param confidence_level: The confidence level for calculating the Value at Risk (VaR). The default value is 0.05, which corresponds to 95% confidence.
         """
         super().__init__(portfolios, bench)
         
@@ -82,7 +86,7 @@ class Charts(Performance):
             "Monthly Volatility": self.monthly_volatility(),
             "Annualized Volatility": self.annualized_volatility(),
             "Maximum Drawdown": self.max_drawdown(),
-            "Sharpe Ratio": self.sharpe_ratio(0.2), 
+            "Sharpe Ratio": self.sharpe_ratio(), 
             "Tracking Error":self.tracking_error(), 
             "t-stat":self.compute_t_stat()
         })
@@ -95,11 +99,11 @@ class Charts(Performance):
     
     def get_figures(self, column_name:str, portfolio_keys: Union[str, List[str]] = None):
         """
-    Plot a histogram using Plotly for the specified column in the DataFrame.
+        Plot a histogram using Plotly for the specified column in the DataFrame.
 
-    :param data: DataFrame containing the data.
-    :param column_name: Name of the column to plot.
-    """
+        :param data: DataFrame containing the data.
+        :param column_name: Name of the column to plot.
+        """
         # Create a DataFrame from the collected metrics
         results_df = self.get_table(portfolio_keys)
         if column_name in results_df.columns:
@@ -110,8 +114,8 @@ class Charts(Performance):
             fig.update_layout(
                 title=f'Histogram of {column_name}',
                 xaxis_title=column_name,
-                xaxis=dict( tickmode='auto',  # Could be 'auto' or 'linear' or 'array'
-                            tickformat=',',),  # Use ',' as a thousand separator to show full numbers.
+                xaxis=dict( tickmode='auto',  
+                            tickformat=',',), 
                 yaxis_title='Frequency',
                 # bargap=0.2, 
                 template='plotly_white' 

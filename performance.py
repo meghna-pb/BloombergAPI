@@ -1,22 +1,36 @@
 import pandas as pd
 import numpy as np
 
-from optimisation import DATES, RETURNS, WEIGHT
+from signals import DATES, RETURNS, WEIGHT
 
 SHARPE_RATIO = "SHARPE_RATIO"
 
 class Performance: 
-    def __init__(self, portfolios, bench):
+    """This class provides methods to calculate various performance metrics for the given portfolios, including Sharpe Ratio, Value at Risk, and tracking error relative to a specified benchmark. """
+    
+    def __init__(self, portfolios:dict, bench:pd.DataFrame, risk_free_rate:float=0.2, confidence_level:float=0.05):
         """
-        Initialize the Performance class with portfolio data.
+        Initialize the Performance class with portfolio data and additional parameters for performance evaluation.
         
-        :param portfolio: DataFrame with portfolio data, including columns ['RETURNS', 'VOLATILITY']
+        :param portfolios: Dictionary containing portfolio data. Each key should be a portfolio name, and each value should be a DataFrame with at least the columns ['RETURNS', 'VOLATILITY'].
+        :param bench: DataFrame containing benchmark data. This data is used for calculating metrics like tracking error. The DataFrame should have at least a column 'RETURNS' that corresponds to the benchmark returns.
+        :param risk_free_rate: The risk-free rate to be used in financial calculations such as the Sharpe Ratio. Default is 0.2.
+        :param confidence_level: The confidence level for calculating the Value at Risk (VaR). The default value is 0.05, which corresponds to 95% confidence.
         """
         self.portfolios = portfolios
         self.bench = bench
+        self.risk_free_rate = risk_free_rate
+        self.confidence_level = confidence_level
 
     def compute_t_stat(self):
-        # Initialize a dictionary to store t-stats for each portfolio
+        """
+        Calculate the t-statistic for each portfolio compared to the benchmark to determine statistical significance
+        of the differences in their returns.
+
+        :return: A dictionary with portfolio names as keys and their respective t-statistics as values. If the
+        calculation cannot be performed (e.g., due to zero standard deviation or insufficient data points), the value
+        will be None for that portfolio.
+        """
         t_stats = {}
 
         for portfolio_name, data in self.portfolios.items():
@@ -49,15 +63,6 @@ class Performance:
         for key, data in self.portfolios.items():
             dict_results[key] = round(((data[RETURNS] + 1).cumprod().iloc[-1] - 1), 2)
         return dict_results
-    
-        # dict_results = {}
-        # for key, data in self.portfolios.items():
-        #     log_returns = np.log1p(data[RETURNS])  
-        #     total_log_return = log_returns.sum()
-        #     compounded_return = np.expm1(total_log_return)  
-            
-        #     dict_results[key] = round(compounded_return, 2)
-        # return dict_results
     
     def annualized_performance(self) -> dict:
         """
@@ -108,7 +113,7 @@ class Performance:
             dict_results[key] = round((data[RETURNS].dropna()+1).cumprod().diff().min(), 2)
         return dict_results
     
-    def value_at_risk(self, confidence_level=0.05):
+    def value_at_risk(self):
         """
         Calculate the Value at Risk (VaR) at a specified confidence level for each portfolio. 
     
@@ -116,11 +121,11 @@ class Performance:
         :return: A dictionary with the VaR for each portfolio, negative values indicate losses.
         """
         results = {}
-        for key, data in self.portfolios.items() : #self.portfolio.items():
-            results[key] = round(np.percentile(data[RETURNS], 100 * (1 - confidence_level)), 2)
+        for key, data in self.portfolios.items() : 
+            results[key] = round(np.percentile(data[RETURNS], 100 * (1 - self.confidence_level)), 2)
         return results
     
-    def sharpe_ratio(self, risk_free_rate):
+    def sharpe_ratio(self):
         """
         Calculate the Sharpe Ratio for each portfolio based on returns provided in 'dict_returns'.
     
@@ -128,8 +133,8 @@ class Performance:
         :return: A dictionary with Sharpe Ratios for each portfolio.
         """
         results = {}
-        for key, data in self.portfolios.items(): # self.portfolio.items():
-            results[key] = round((data[RETURNS].mean() - risk_free_rate) / data[RETURNS].std(), 2)
+        for key, data in self.portfolios.items(): 
+            results[key] = round((data[RETURNS].mean() - self.risk_free_rate) / data[RETURNS].std(), 2)
             # * np.sqrt(12) ? je sais jamais ou il faut le mettre 
         return results
     

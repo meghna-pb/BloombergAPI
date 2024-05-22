@@ -1,21 +1,23 @@
 import pandas as pd
-import numpy as np
 
-from signals import RETURNS, VOLUME, PX_LAST, WEIGHT, WEIGHTED_RETURNS, POSITION, LONG, SHORT, RETURNS, VOLATILITY, RFR
-
-DATES = "DATES"
+from signals import RETURNS, VOLUME, PX_LAST, WEIGHT, WEIGHTED_RETURNS, POSITION, LONG, SHORT, RETURNS, VOLATILITY, DATES
+from performance import Performance
 
 
 class Optimisation:
-    def __init__ (self, returns_portfolios:dict, volume_portfolios:dict):
+    def __init__ (self, returns_portfolios:dict, volume_portfolios:dict, risk_free_rate:float=0.02, bench:pd.DataFrame=None):       
         """
         Initialize the Optimisation class to manage portfolio weights and calculations based on different strategies.
         
-        :param returns_portfolios: Dictionary containing returns data for various portfolios.
-        :param volume_portfolios: Dictionary containing volume data for various portfolios.
+        :param returns_portfolios: Dictionary containing returns sorted data for various portfolios.
+        :param volume_portfolios: Dictionary containing volume sorted data for various portfolios.
+        :param risk_free_rate: The risk-free rate used for calculations such as the Sharpe Ratio. Default value is 0.02.
+        :param bench: Optional. A DataFrame containing benchmark data against which portfolio performance can be compared.
         """
         self.returns_portfolios = returns_portfolios
         self.volume_portfolios = volume_portfolios
+        self.risk_free_rate = risk_free_rate
+        self.bench = bench
 
         
     @staticmethod
@@ -99,30 +101,44 @@ class Optimisation:
                 ptf.loc[ptf[POSITION] == SHORT, WEIGHT] = -short_dollar_volume / total_short_dollar_vol if total_short_dollar_vol != 0 else 0
             
                 ptf[WEIGHTED_RETURNS] = ptf[RETURNS] * ptf[WEIGHT]
-        return portfolios
+        return portfolios    
+
     
-    @staticmethod
-    def get_sharpe_weight(portfolios: dict) -> dict:
+    def get_best_weighting_method(self, portfolios: dict) -> dict:
         """
-        Assign weights based on the Sharpe ratio, considering both expected returns and volatility.
+        Test all weighting methods and return the results for the best one based on the Sharpe Ratio.
         
         :param portfolios: Dictionary of portfolio data.
-        
-        :return: Updated dictionary with weights calculated from Sharpe ratios.
+        :return: Updated dictionary with weights based on best ponderation method.
         """
-        for date in portfolios.keys():
-            for name, ptf in portfolios[date].items():
-                sharpe_ratios = (ptf[RETURNS] - ptf[RFR]) / ptf[RETURNS].std()
-                sharpe_ratios = sharpe_ratios.replace([np.inf, -np.inf, np.nan], 0)
+        weighting_methods = {
+            'equal': self.get_equal_weight,
+            'volume': self.get_volume_weight,
+            'inverse_volatility': self.get_inverse_volatility_weight,
+            'dollar_volume': self.get_dollar_volume_weight
+        }
 
-                long_weights = sharpe_ratios[ptf[POSITION] == LONG]
-                ptf.loc[ptf[POSITION] == LONG, WEIGHT] = long_weights / long_weights.sum()
-                short_weights = sharpe_ratios[ptf[POSITION] == SHORT]
-                ptf.loc[ptf[POSITION] == SHORT, WEIGHT] = -(abs(short_weights) / abs(short_weights).sum())
+        best_sharpe_ratio, best_method, best_portfolios = -float('inf'), None, None
 
-                ptf[WEIGHTED_RETURNS] = ptf[RETURNS] * ptf[WEIGHT]
-        return portfolios
-    
+        for name, method in weighting_methods.items():
+            weighted_returns = method(portfolios)
+            full_returns = self.get_full_results(weighted_returns)
+
+            method_performance = Performance(portfolios=full_returns, 
+                                             bench=self.bench, 
+                                             risk_free_rate=self.risk_free_rate) 
+        
+            sharpe_ratios = method_performance.sharpe_ratio()
+            average_sharpe_ratio = sum(sharpe_ratios.values()) / len(sharpe_ratios)
+            
+            # Check if this method has the best Sharpe Ratio
+            if average_sharpe_ratio > best_sharpe_ratio:
+                best_sharpe_ratio = average_sharpe_ratio
+                best_method = name
+                best_portfolios = weighted_returns
+
+        print(f"Best weighting method: {best_method}, with Sharpe Ratio: {round(best_sharpe_ratio, 2)}")
+        return best_portfolios
     
     @staticmethod
     def __get_dated_results(dated_portfolio: pd.DataFrame) -> float:
