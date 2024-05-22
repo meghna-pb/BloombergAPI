@@ -84,7 +84,6 @@ class Data:
                                             px_volume.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: VOLUME}), 
                                             returns.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: RETURNS}),
                                             volatility.reindex(tickers, axis='columns').dropna(axis=1).rename(index={nearest_date: VOLATILITY})]).T
-                data[nearest_date][RFR] = self.risk_free_rate 
         return data
 
     def get_benchmark(self):

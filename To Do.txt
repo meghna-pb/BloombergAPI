@@ -20,7 +20,7 @@ PONDERATION DES PORTEFEUILLES (optimisation.py) :
 - Calcul des poids équipondérés 				-> OK
 - Calcul des poids selon volatilité 				-> OK
 - Calcul des poids selon ratio de sharpe 			-> OK
-Rq : Appels de la classe perf pour meilleure pondération ?	-> CARO
+Rq : Appels de la classe perf pour meilleure pondération ?	-> OK
 --> trouver meilleure pondé qui max rdt et min risque (C)
 
 TEST DE PERFORMANCE (performance.py) :
@@ -32,14 +32,14 @@ TEST DE PERFORMANCE (performance.py) :
 - Calcul de la t-stat pour tous les résultats  			-> OK
 
 GRAPHS (figures.py) : 
-- Graphiques des performances 				-> OK
-- Graphique des perf cumulées			 	-> OK
+- Graphiques des performances 					-> OK
+- Graphique des perf cumulées			 		-> OK
 - Overall Performance 						-> OK
 - Performances annualisées 					-> OK
-- Daily, Monthly, Annualized Vol			-> OK (sauf daily) 
-- Ratio de Sharpe 						    -> OK
-- Maximum Drawdown 						    -> OK
-- Historical VaR 						    -> OK
+- Daily, Monthly, Annualized Vol				-> OK (sauf daily) 
+- Ratio de Sharpe 						-> OK
+- Maximum Drawdown 						-> OK
+- Historical VaR 						-> OK
 
 PORTEFEUILLE BLOOM :
 - Créer les fichiers excels/csv 				-> CARO
@@ -48,9 +48,7 @@ PORTEFEUILLE BLOOM :
 SOUTENANCE : 
 - Dashboard 							-> MEGHNA
 - Architecture du code (chachou) 				-> CARO
-- 
 
-+++ Verifier la création de portefeuilles croisé (cf fct intersec) 
 
 
 
