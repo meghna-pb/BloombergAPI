@@ -42,7 +42,7 @@ class Charts(Performance):
             fig.add_trace(go.Scatter(x=portfolio_data.index, y=portfolio_data[RETURNS], mode='lines+markers', name=f'Portfolio {portfolio_key}'))
 
         fig.update_layout(title=title, xaxis_title='Dates', yaxis_title=RETURNS, legend_title='Portfolios')
-        fig.show()  
+        return fig
         
     def cumulative_viewer(self, portfolio_keys: Union[str, List[str]] = None):
         """
@@ -69,7 +69,7 @@ class Charts(Performance):
             fig.add_trace(go.Scatter(x=portfolio_data.index, y=cumulative_returns, mode='lines+markers', name=f'Portfolio {portfolio_key}'))
         
         fig.update_layout(title=title, xaxis_title='Dates', yaxis_title='Cumulative Returns', legend_title='Portfolios')
-        fig.show()
+        return fig
 
     def get_table(self, portfolio_keys: Union[str, List[str]] = None):
         """
@@ -121,7 +121,7 @@ class Charts(Performance):
                 template='plotly_white' 
             )
             
-            fig.show()
+            return fig
         else:
             print(f"Column '{column_name}' not found in the DataFrame.")
 

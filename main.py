@@ -109,9 +109,9 @@ def test2(path, J, K, n, m, risk_free_rate, ponderation_method) :
     optim = Optimisation(returns_portfolios=simple_returns, volume_portfolios=simple_volume)
     ponderation_methods = {"equi": optim.get_equal_weight,
                            "vol": optim.get_inverse_volatility_weight,
-                           "sharpe": optim.get_sharpe_weight,
                            "volume": optim.get_volume_weight,
-                           "volumexprice": optim.get_dollar_volume_weight}
+                           "volumexprice": optim.get_dollar_volume_weight,
+                            "best" :optim.get_best_weighting_method }
 
     if ponderation_method in ponderation_methods:
         weight_function = ponderation_methods[ponderation_method]
@@ -138,9 +138,9 @@ def test_st(data, K, n, m, ponderation_method, viewer, method = None) :
     optim = Optimisation(returns_portfolios=simple_returns, volume_portfolios=simple_volume)
     ponderation_methods = {"equi": optim.get_equal_weight,
                            "vol": optim.get_inverse_volatility_weight,
-                           "sharpe": optim.get_sharpe_weight,
                            "volume": optim.get_volume_weight,
-                           "volumexprice": optim.get_dollar_volume_weight}
+                           "volumexprice": optim.get_dollar_volume_weight, 
+                            "best" :optim.get_best_weighting_method }
 
     if ponderation_method in ponderation_methods:
         weight_function = ponderation_methods[ponderation_method]
@@ -153,11 +153,13 @@ def test_st(data, K, n, m, ponderation_method, viewer, method = None) :
 
     charts = Charts(portfolios=full_results, bench=bench)
     if viewer == "perf":
-        charts.viewer(portfolio_keys=None)
-    elif  viewer == "hist":
-        charts.get_figures(method)
+        fig = charts.viewer(portfolio_keys=None)
+    elif viewer == "hist":
+        fig = charts.get_figures(method, portfolio_keys=None)
     elif viewer == "cumulative_v":
-        charts.cumulative_viewer(portfolio_keys=None)
+        fig = charts.cumulative_viewer(portfolio_keys=None)
+    
+    return fig
     # print(charts.get_table()) # portfolio_keys=['R1_V1', 'R2_V1', 'R1_V2', 'R2_V2'])
 
 # test_st(path="Data", J=3, K=3, n=7, m=5, risk_free_rate=0.2, ponderation_method="vol", method = "Tracking Error") # -> OK
