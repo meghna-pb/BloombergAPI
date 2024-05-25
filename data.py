@@ -1,7 +1,14 @@
 import pandas as pd
 from datetime import datetime
+import pandas as pd
+import os
+from datetime import datetime as dt
+from glob import glob
+import pyarrow.parquet as pq
 
 VOLUME, PX_LAST, RETURNS, VOLATILITY, RFR, WEIGHT, WEIGHTED_RETURNS = "PX_VOLUME", "PX_LAST", "RETURNS", "VOLATILITY", "RFR", "WEIGHT", "WEIGHTED_RETURNS"
+parquetTempFilePath = "Data/parquet/"
+
 class Data:
     def __init__(self, path="", J=3, risk_free_rate:float=0.2, index_ticker = 'RIY Index', 
                  start_date = datetime(2024, 1, 28), end_date = datetime.now()) -> None:
@@ -23,9 +30,9 @@ class Data:
             self.df_px_last = dict_data[PX_LAST].sort_index()
             self.df_px_volume = dict_data[VOLUME].sort_index()
         else:
-            self.df_compo = pd.read_excel(path+'/Bloomberg_Compo.xlsx', sheet_name="Compo")
-            self.df_px_last = pd.read_excel(path+'/Bloomberg_Data.xlsx', sheet_name='PX LAST', index_col=0)
-            self.df_px_volume = pd.read_excel(path+'/Bloomberg_Data.xlsx', sheet_name='PX VOLUME', index_col=0)
+            self.df_compo = self.__read_file('Data/Bloomberg_Compo.xlsx', sheet_name="Compo")
+            self.df_px_last = self.__read_file('Data/Bloomberg_Data.xlsx', sheet_name='PX LAST', saveToParquet=True, index_col=0)
+            self.df_px_volume = self.__read_file('Data/Bloomberg_Data.xlsx', sheet_name='PX VOLUME', saveToParquet=True, index_col=0)
         
         self.df_px_last = self.__treat_df(self.df_px_last, format='%Y%m%d')
         self.df_px_volume = self.__treat_df(self.df_px_volume, format='%Y%m%d')
@@ -104,3 +111,55 @@ class Data:
         results_df.set_index('DATES', inplace=True)
         
         return results_df
+    def convertToFloatOrStr(self, val):
+        try:
+
+            return float(val)
+
+        except ValueError:
+
+            return str(val)
+    def __read_file(self, filepath, sheet_name=None, saveToParquet=True, index_col=None):
+        if filepath.endswith(".parquet"):
+            return pd.read_parquet(filepath)
+        
+        # Initialize DATA as an empty DataFrame
+        DATA = pd.DataFrame()
+
+        # Reads a file, receives an xlsx file. Tests to find if the parquet file exists.
+        # if it doesn't, it reads the excel and creates parquet.
+        # If it does, it reads the parquet
+        directory, filename = os.path.split(filepath)
+        modification_time = os.path.getmtime(filepath)
+        parquetFileName = filename[:-5].replace(' ', '_') + str(int(modification_time))
+        if sheet_name:
+            parquetFileName += "_" + sheet_name
+        parquetFileName += ".parquet"
+        
+        parquetFilePath = os.path.join(parquetTempFilePath, parquetFileName)
+        
+        if os.path.exists(parquetFilePath):
+            # If the parquet file exists, read from parquet
+            DATA = pd.read_parquet(parquetFilePath)
+            for col in DATA.columns:
+                try:
+                    DATA[col] = DATA[col].astype(float)
+                except:
+                    # if was not convertible to float, try converting each row to float
+                    DATA[col] = DATA[col].apply(self.convertToFloatOrStr)
+        else:
+            # If parquet file does not exist, read from Excel and create a new parquet file
+            try:
+                FILE = pd.ExcelFile(filepath) #, engine="openpyxl")
+                if sheet_name:
+                    DATA = pd.read_excel(FILE, sheet_name, index_col=index_col)
+                else:
+                    DATA = pd.read_excel(filepath, index_col=index_col)
+            except FileNotFoundError:
+                raise FileNotFoundError("\n\nThe file '"+filename+"' was not found in the directory '"+directory+"'.")
+            
+            if len(DATA) > 0 and saveToParquet:  # Don't save to parquet if dataset does not contain any data
+                DATA.astype(str).to_parquet(parquetFilePath, engine='pyarrow')
+        
+        return DATA
+

@@ -1,5 +1,5 @@
 import streamlit as st
-from useful import run_app
+from tools import run_app
 from data import Data
 from datetime import datetime
 
@@ -19,19 +19,18 @@ m = col4.number_input('Choose the number of volume portfolios ', min_value=1, st
 if ind_choice != 'RIY Index':
     ind_ticker = st.text_input('Input the ticker', value="SPX Index")
     col1, col2 = st.columns(2)
-    start_dt = col1.date_input("Choose the start date : ", max_value =  datetime(2024, 1, 28))
-    end_dt = col2.date_input("Choose the end date : ", max_value =datetime.now())
+    start_dt = col1.date_input("Choose the start date : ", max_value =  datetime(2024, 1, 28),  value=datetime(2024, 1, 28), )
+    end_dt = col2.date_input("Choose the end date : ", max_value = datetime.now())
     data = Data(path="", J=J, risk_free_rate=risk_free_rate, index_ticker =ind_ticker, 
                  start_date = start_dt, end_date = end_dt) 
 
 else:
     bbg_or_xl = st.radio('Do you want to fetch the data from Bloomberg or our Excel extract?', 
              ['Excel', 'Bloomberg'], 
-            horizontal=True  ,
-)
+            horizontal=True )
     if bbg_or_xl == "Bloomberg":
         col1, col2 = st.columns(2)
-        start_dt = col1.date_input("Choose the start date : ", max_value =  datetime(2024, 1, 28))
+        start_dt = col1.date_input("Choose the start date : ", max_value =  datetime(2024, 1, 28), value=datetime(2024, 1, 28))
         end_dt = col2.date_input("Choose the end date : ", max_value = datetime.now())
         data = Data(path="", J=J, risk_free_rate=risk_free_rate, 
                  start_date = start_dt, end_date = end_dt) 
@@ -45,14 +44,17 @@ pond = dict_pond[pond_choice]
 
 col1, col2 = st.columns(2)
 viewer = col1.selectbox('Select the graph you want', 
-                    ["Histogram of metrics" ,"Performance","Cumulated performance" ])
+                    ["Performance", "Histogram of metrics" ,"Cumulated performance" ], 
+                    )
 
 metric = col2.selectbox('Select the metric', 
                     ["Overall Performance" ,"Annualized Performance","Monthly Volatility" ,
                      "Annualized Volatility","Maximum Drawdown","Sharpe Ratio" ,"Tracking Error" ,"t-stat" ])
-
-
 view_choice = {"Histogram of metrics":"hist" ,"Performance":"perf","Cumulated performance": "cumulative_v"}
+
 if st.button('Show results'):
-    fig = run_app(data, K, n, m, pond, view_choice[viewer], method=metric)
+    fig, df = run_app(data, K, n, m, pond, view_choice[viewer], method=metric)
+    df_r = df.round(2)
     st.plotly_chart(fig)
+    st.dataframe(df_r)
+
