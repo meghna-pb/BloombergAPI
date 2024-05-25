@@ -41,7 +41,6 @@ class Data:
         self.df_volatility = self.__calculate_volatility()
         
         
-        
     def __treat_df(self, df, format) -> pd.DataFrame:
         """
         Cleans DataFrame columns, including stripping of extra characters and standardizing date formats.
@@ -52,6 +51,70 @@ class Data:
         df.columns = df.columns.str.replace(" Equity", "")
         df.index = pd.to_datetime(df.index, format=format)
         return df.sort_index()
+    
+    def convertToFloatOrStr(self, val):
+        """
+        Attempts to convert the input value to a float. 
+        If the conversion fails due to a ValueError, it converts the value to a string instead.
+
+        :param val: The value to be converted. This can be any type that is convertible to float or string.
+        :return: The converted value, either as a float if convertible, otherwise as a string.
+        """
+        try:
+            return float(val)
+        except ValueError:
+            return str(val)
+        
+    def __read_file(self, filepath, sheet_name=None, saveToParquet=True, index_col=None):
+        """
+        Reads data from the specified file path. 
+
+        :param filepath: String specifying the path to the file that needs to be read.
+        :param sheet_name: Optional string specifying the Excel sheet name to be read. If None, the default sheet is read.
+        :param saveToParquet: Boolean indicating whether to save the read data to a Parquet file for quicker subsequent reads.
+        :param index_col: Optional parameter to specify the column to be used as the index in the DataFrame.
+
+        :return: A pandas DataFrame containing the data read from the file.
+
+        :raises FileNotFoundError: If the specified file does not exist at the given filepath.
+        """
+        
+        if filepath.endswith(".parquet"):
+            return pd.read_parquet(filepath)
+        
+        DATA = pd.DataFrame()
+
+        # Reads a file, receives an xlsx file. Tests to find if the parquet file exists.
+        # if it doesn't, it reads the excel and creates parquet, if it does, it reads the parquet
+        directory, filename = os.path.split(filepath)
+        modification_time = os.path.getmtime(filepath)
+        parquetFileName = filename[:-5].replace(' ', '_') + str(int(modification_time))
+        if sheet_name:
+            parquetFileName += "_" + sheet_name
+        parquetFileName += ".parquet"
+        parquetFilePath = os.path.join(parquetTempFilePath, parquetFileName)
+        
+        if os.path.exists(parquetFilePath):
+            DATA = pd.read_parquet(parquetFilePath)
+            for col in DATA.columns:
+                try:
+                    DATA[col] = DATA[col].astype(float)
+                except:
+                    DATA[col] = DATA[col].apply(self.convertToFloatOrStr)
+        else:
+            try:
+                FILE = pd.ExcelFile(filepath) #, engine="openpyxl")
+                if sheet_name:
+                    DATA = pd.read_excel(FILE, sheet_name, index_col=index_col)
+                else:
+                    DATA = pd.read_excel(filepath, index_col=index_col)
+            except FileNotFoundError:
+                raise FileNotFoundError("\n\nThe file '"+filename+"' was not found in the directory '"+directory+"'.")
+            
+            if len(DATA) > 0 and saveToParquet:
+                DATA.astype(str).to_parquet(parquetFilePath, engine='pyarrow')
+        
+        return DATA
 
     def __calculate_returns(self) -> pd.DataFrame:
         """
@@ -111,55 +174,4 @@ class Data:
         results_df.set_index('DATES', inplace=True)
         
         return results_df
-    def convertToFloatOrStr(self, val):
-        try:
-
-            return float(val)
-
-        except ValueError:
-
-            return str(val)
-    def __read_file(self, filepath, sheet_name=None, saveToParquet=True, index_col=None):
-        if filepath.endswith(".parquet"):
-            return pd.read_parquet(filepath)
-        
-        # Initialize DATA as an empty DataFrame
-        DATA = pd.DataFrame()
-
-        # Reads a file, receives an xlsx file. Tests to find if the parquet file exists.
-        # if it doesn't, it reads the excel and creates parquet.
-        # If it does, it reads the parquet
-        directory, filename = os.path.split(filepath)
-        modification_time = os.path.getmtime(filepath)
-        parquetFileName = filename[:-5].replace(' ', '_') + str(int(modification_time))
-        if sheet_name:
-            parquetFileName += "_" + sheet_name
-        parquetFileName += ".parquet"
-        
-        parquetFilePath = os.path.join(parquetTempFilePath, parquetFileName)
-        
-        if os.path.exists(parquetFilePath):
-            # If the parquet file exists, read from parquet
-            DATA = pd.read_parquet(parquetFilePath)
-            for col in DATA.columns:
-                try:
-                    DATA[col] = DATA[col].astype(float)
-                except:
-                    # if was not convertible to float, try converting each row to float
-                    DATA[col] = DATA[col].apply(self.convertToFloatOrStr)
-        else:
-            # If parquet file does not exist, read from Excel and create a new parquet file
-            try:
-                FILE = pd.ExcelFile(filepath) #, engine="openpyxl")
-                if sheet_name:
-                    DATA = pd.read_excel(FILE, sheet_name, index_col=index_col)
-                else:
-                    DATA = pd.read_excel(filepath, index_col=index_col)
-            except FileNotFoundError:
-                raise FileNotFoundError("\n\nThe file '"+filename+"' was not found in the directory '"+directory+"'.")
-            
-            if len(DATA) > 0 and saveToParquet:  # Don't save to parquet if dataset does not contain any data
-                DATA.astype(str).to_parquet(parquetFilePath, engine='pyarrow')
-        
-        return DATA
 
