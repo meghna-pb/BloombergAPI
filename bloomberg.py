@@ -1,6 +1,6 @@
+from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
-from datetime import datetime, timedelta
 import blpapi
 # A installer sur les ordi bloom : python -m pip install --index-url=https://bcms.bloomberg.com/pip/simple blpapi
 
@@ -315,46 +315,23 @@ class BLP():
     def closeSession(self):
         print("Session closed")
         self.session.stop()
-        
-        
-####################################################################################################################
-################################################# Data importation #################################################
-####################################################################################################################    
-     
-blp = BLP()
-
-# # Dates : 
-# start_date = datetime(2024, 1, 28) # datetime(1999, 1, 28)
-# end_date = datetime.now()
-# dates_list = [start_date + i * timedelta(days=30) for i in range((end_date - start_date).days // 30 + 1)]
-
-# ##### Index compositions: #####
-
-# strFields = ["INDX_MWEIGHT_HIST"]  
-# tickers = ["RIY Index"] # RUSSEL
-# df_compo = pd.DataFrame()
-
-# for date in dates_list :
-#     results = blp.bds(strSecurity=tickers, strFields=strFields, snapshot_date=date)
-#     new_column = results[tickers[0]]
-#     new_column = new_column[~new_column[date].astype(str).apply(lambda x: any(char.isdigit() for char in x))]
-#     df_compo[date] = new_column[date]
-
-# # Flatten tickers (to have a unique list of tickers for all dates):
-# flattened_data = df_compo.values.ravel()
-# flattened_data_unique = list(set(flattened_data))
-# list_tickers = [str(ticker) + " Equity" for ticker in flattened_data_unique]
-
-# ##### Data : #####
-
-# tickers = list_tickers
-# strFields = ["PX_LAST", "PX_VOLUME"] 
-# # strFields = ["RETURN_COM_EQY", "PE_RATIO", "EARN_YLD", "TURNOVER", "CUR_MKT_CAP", "NORMALIZED_ROE", "EQY_TURNOVER_REALTIME", "EQY_FLOAT"]
-
-# dict_data = blp.bdh(strSecurity=tickers, strFields=strFields, startdate=start_date, enddate=end_date, per='MONTHLY', curr="USD")
 
 
 def fetch_bloomberg_data(start_date, end_date, index_ticker, data_fields = ["PX_LAST", "PX_VOLUME"]):
+    """
+    Fetches historical market data and index compositions from Bloomberg for specified tickers over a given date range.
+    
+    :param start_date (datetime): The beginning of the date range for data retrieval.
+    :param end_date (datetime): The end of the date range for data retrieval.
+    :param index_ticker (str): The Bloomberg ticker for the index whose data is to be fetched.
+    :param data_fields (list of str): Specific fields of data to retrieve, default is last price and volume.
+
+    :returns : A dictionary containing historical data for all unique constituents of the index
+               and a DataFrame with index compositions on each date.
+    """
+    
+    blp = BLP()
+
     # Generate a list of dates in monthly intervals
     dates_list = [start_date + i * timedelta(days=30) for i in range((end_date - start_date).days // 30 + 1)]
     
@@ -378,31 +355,6 @@ def fetch_bloomberg_data(start_date, end_date, index_ticker, data_fields = ["PX_
     # Fetch data for the tickers
     tickers = list_tickers
     dict_data = blp.bdh(strSecurity=tickers, strFields=data_fields, startdate=start_date, enddate=end_date, per='MONTHLY', curr="USD")
-    blp.closeSession() ### on le met ici ??
+    blp.closeSession() 
 
     return dict_data, df_compo
-
-# # Usage
-# start_date = datetime(2024, 1, 28)
-# end_date = datetime.now()
-# index_ticker = "RIY Index"  # RUSSEL
-# data_fields = ["PX_LAST", "PX_VOLUME"] 
-
-# dict_data, df_compo = fetch_bloomberg_data(start_date, end_date, index_ticker, data_fields)
-
-
-## Conversion to Excel Files: 
-    
-# df_compo.to_excel("Bloomberg_Compo.xlsx", index=False)
-# dict_data["PX_LAST"].to_excel("Bloomberg_data_pxlast.xlsx", index=True)
-# dict_data["PX_VOLUME"].to_excel("Bloomberg_data_pxvolume.xlsx", index=True)
-
-# dict_data["RETURN_COM_EQY"].to_excel("Bloomberg_data_RETURN_COM_EQY.xlsx", index=True)
-# dict_data["PE_RATIO"].to_excel("Bloomberg_data_PE_RATIO.xlsx", index=True)
-# dict_data["EARN_YLD"].to_excel("Bloomberg_data_EARN_YLD.xlsx", index=True)
-# dict_data["TURNOVER"].to_excel("Bloomberg_data_TURNOVER.xlsx", index=True)
-# dict_data["CUR_MKT_CAP"].to_excel("Bloomberg_data_CUR_MKT_CAP.xlsx", index=True)
-# dict_data["NORMALIZED_ROE"].to_excel("Bloomberg_data_NORMALIZED_ROE.xlsx", index=True)
-# dict_data["EQY_TURNOVER_REALTIME"].to_excel("Bloomberg_data_EQY_TURNOVER_REALTIME.xlsx", index=True)
-# dict_data["EQY_FLOAT"].to_excel("Bloomberg_data_EQY_FLOAT.xlsx", index=True)
-

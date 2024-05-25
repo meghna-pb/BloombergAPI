@@ -1,10 +1,10 @@
 import streamlit as st
-from main import test_st
+from useful import run_app
 from data import Data
 from datetime import datetime
+
 st.title("Bloomberg API - Master 272")
 st.write("Meghna BHAUGEERUTTY, Caroline KIRCH")
-
 
 ind_choice = st.selectbox('Select the index on which to apply the strategy', 
              ['RIY Index', 'Other'])
@@ -54,5 +54,5 @@ metric = col2.selectbox('Select the metric',
 
 view_choice = {"Histogram of metrics":"hist" ,"Performance":"perf","Cumulated performance": "cumulative_v"}
 if st.button('Show results'):
-    fig = test_st(data, K, n, m, pond, view_choice[viewer], method=metric)
+    fig = run_app(data, K, n, m, pond, view_choice[viewer], method=metric)
     st.plotly_chart(fig)

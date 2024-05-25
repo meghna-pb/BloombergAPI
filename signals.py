@@ -95,11 +95,6 @@ class Signal:
                         raise ("Intersected portfolios requires asset weighting")
                     intersection_index = R_portfolio.index.intersection(V_portfolio.index)
                     
-                    # intersected_portfolio = pd.concat([R_portfolio.loc[intersection_index],  V_portfolio.loc[intersection_index]])
-                    # intersected_portfolio[WEIGHT] = R_portfolio.loc[intersection_index, WEIGHT] + V_portfolio.loc[intersection_index, WEIGHT]
-                    # intersected_portfolio[WEIGHTED_RETURNS] = R_portfolio.loc[intersection_index, WEIGHTED_RETURNS] + V_portfolio.loc[intersection_index, WEIGHTED_RETURNS]
-                    # intersected_portfolio.drop(POSITION, axis=1, inplace=True)
-                    
                     intersected_portfolio = R_portfolio.loc[intersection_index].copy()
                     intersected_portfolio[WEIGHT] = R_portfolio[WEIGHT] + V_portfolio.loc[intersection_index, WEIGHT]
                     intersected_portfolio[WEIGHTED_RETURNS] = (R_portfolio.loc[intersection_index, WEIGHTED_RETURNS] +

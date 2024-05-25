@@ -42,13 +42,12 @@ GRAPHS (figures.py) :
 - Historical VaR 						-> OK
 
 PORTEFEUILLE BLOOM :
-- Créer les fichiers excels/csv 				-> CARO
+- Créer les fichiers excels/csv 				-> OK
 (dates, tickers, poids) 
 
 SOUTENANCE : 
 - Dashboard 							-> MEGHNA
 - Architecture du code (chachou) 				-> CARO
-
 
 
 
