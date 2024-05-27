@@ -11,7 +11,7 @@ ind_choice = st.selectbox('Select the index on which to apply the strategy',
 risk_free_rate = st.slider('Choose the risk free rate', min_value=0.01, value=0.2)
 col1, col2 = st.columns(2)
 J = col1.number_input('Choose the period of returns ', min_value=2, step = 1,value =3)
-K =  col2.number_input('Choose the holding period ', min_value=2, step = 1, value =3)
+K =  col2.number_input('Choose the holding period', min_value=2, step = 1, value =3)
 col3, col4 = st.columns(2)
 n =  col3.number_input('Choose the number of returns portfolios', min_value=1, step = 1, value = 7)
 m = col4.number_input('Choose the number of volume portfolios ', min_value=1, step = 1, value = 5)
@@ -37,7 +37,7 @@ else:
     else:
         data = Data(path="Data", J=J, risk_free_rate=risk_free_rate) 
 
-pond_choice = st.selectbox('Choose the weighting method for the strategy', 
+pond_choice = st.selectbox('Choose the weighting scheme for the strategy', 
              ['Equi-weighted', '1/Volatility', 'Volume', 'Volume x price', "Best weighting method"])
 dict_pond = {'Equi-weighted':'equi', '1/Volatility':'vol', 'Volume':'volume', 'Volume x price':'volumexprice', "Best":"best"}
 pond = dict_pond[pond_choice]
