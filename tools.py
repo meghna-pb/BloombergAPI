@@ -1,8 +1,10 @@
 from data import Data
 from signals import Signal
 from optimisation import Optimisation, WEIGHT
+from performance import Performance
 from charts import Charts
 
+from itertools import product
 from datetime import datetime
 import pandas as pd
 
@@ -34,7 +36,7 @@ def export_to_excel(intersected_portfolios:dict, start_date:str, end_date:str, f
     combined_data.to_csv(filename + ".csv", index=False)
 
 
-def run_excel(J:int, K:int, n:int, m:int, risk_free_rate:float, ponderation_method:str, filename:str=None) :
+def run_excel(J:int, K:int, n:int, m:int, risk_free_rate:float, ponderation_method:str, filename:str=None, outputs:bool=True) :
     """
     Executes the full analysis pipeline for optimizing and evaluating investment portfolios based on specified weighting methods. 
     This function incorporates steps from data fetching and signal processing to portfolio optimization, intersection, and comprehensive visualization of results.
@@ -46,6 +48,7 @@ def run_excel(J:int, K:int, n:int, m:int, risk_free_rate:float, ponderation_meth
     :param risk_free_rate: Float representing the risk-free rate used in financial calculations.
     :param ponderation_method: String specifying the weighting method to be applied to the portfolios. 
     :param filename: Optional string. If provided, specifies the filename where the Excel output of intersected portfolios will be saved. If None, no file is saved.
+    :param outputs: Optional bool. If provided, portfolio performances are not displayed.
 
     :return: None. Directly prints and displays portfolio performance results and visualizations.
     """
@@ -79,12 +82,15 @@ def run_excel(J:int, K:int, n:int, m:int, risk_free_rate:float, ponderation_meth
         
     full_results = optim.get_full_results(intersection)
 
-    charts = Charts(portfolios=full_results, bench=bench, risk_free_rate=rfr, confidence_level=0.05)
-    fig_1 = charts.viewer(portfolio_keys=None)
-    fig_1.show()
-    fig_2 = charts.cumulative_viewer(portfolio_keys=None)
-    fig_2.show()
-    print(charts.get_table()) # portfolio_keys=['R1_V1', 'R2_V1', 'R1_V2', 'R2_V2'])
+    if outputs : 
+        charts = Charts(portfolios=full_results, bench=bench, risk_free_rate=rfr, confidence_level=0.05)
+        fig_1 = charts.viewer(portfolio_keys=None)
+        fig_1.show()
+        fig_2 = charts.cumulative_viewer(portfolio_keys=None)
+        fig_2.show()
+        print(charts.get_table()) 
+    
+    return full_results
 
 
 def run_app(data:Data, K:int, n:int, m:int, ponderation_method:str, viewer:str, method:str=None) :
@@ -133,3 +139,47 @@ def run_app(data:Data, K:int, n:int, m:int, ponderation_method:str, viewer:str, 
         fig = charts.cumulative_viewer(portfolio_keys=None)
     
     return fig, charts.get_table()
+
+
+def run_grid_search(J_values, K_values, n_values, m_values, risk_free_rate, ponderation_methods):
+    """
+    Executes a grid search over a range of portfolio parameters to find the optimal configuration 
+    based on the highest Sharpe Ratio.
+
+    :param J_values: List of integers for the number of periods.
+    :param K_values: List of integers for rebalancing intervals.
+    :param n_values: List of integers for the number of return-based portfolios.
+    :param m_values: List of integers for the number of volume-based portfolios.
+    :param risk_free_rate: floats for risk-free rate.
+    :param ponderation_methods: List of strings for different weighting methods.
+    
+    :return: Dictionary with the optimal values for each parameter and the associated maximum Sharpe Ratio.
+    """
+    optimal_params = {}
+    max_sharpe_ratio = -float('inf')
+    
+    for J, K, n, m, method in product(J_values, K_values, n_values, m_values, ponderation_methods):
+        full_results = run_excel(J, K, n, m, risk_free_rate, method, outputs=False)
+        
+        performance = Performance(portfolios=full_results, risk_free_rate=risk_free_rate, bench=None)
+        sharpe_ratios = performance.sharpe_ratio()
+        
+        current_max_sharpe = max(sharpe_ratios.values())
+        current_best_portfolio = max(sharpe_ratios, key=sharpe_ratios.get)
+        if current_max_sharpe > max_sharpe_ratio:
+            max_sharpe_ratio = current_max_sharpe
+            optimal_params = {
+                'J': J, 'K': K,
+                'n': n, 'm': m,
+                'ponderation_method': method,
+                'max_sharpe_ratio': max_sharpe_ratio, 
+                'best portfolio': current_best_portfolio
+            }
+        print(f"J = {J}, K = {K}, n = {n}, m = {m}, method = {method}")
+        print(f"Max sharpe = {current_max_sharpe} for portfolio {current_best_portfolio}")
+        print("    ")
+
+    print("   ")
+    print("Optimal Parameters:")
+    for key, value in optimal_params.items():
+        print(f"{key}: {value}")

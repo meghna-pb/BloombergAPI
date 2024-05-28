@@ -135,7 +135,6 @@ class Performance:
         results = {}
         for key, data in self.portfolios.items(): 
             results[key] = round((data[RETURNS].mean() - self.risk_free_rate) / data[RETURNS].std(), 2)
-            # * np.sqrt(12) ? je sais jamais ou il faut le mettre 
         return results
     
     def tracking_error(self):
