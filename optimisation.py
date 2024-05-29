@@ -129,17 +129,7 @@ class Optimisation:
                                              risk_free_rate=self.risk_free_rate) 
         
             sharpe_ratios = method_performance.sharpe_ratio()
-        #     average_sharpe_ratio = sum(sharpe_ratios.values()) / len(sharpe_ratios)
             
-        #     # Check if this method has the best Sharpe Ratio
-        #     if average_sharpe_ratio > best_sharpe_ratio:
-        #         best_sharpe_ratio = average_sharpe_ratio
-        #         best_method = name
-        #         best_portfolios = weighted_returns
-
-        # print(f"Best weighting method: {best_method}, with Sharpe Ratio: {round(best_sharpe_ratio, 2)}")
-        # return best_portfolios
-        
             # Find the maximum Sharpe Ratio for this method
             max_sharpe_ratio = max(sharpe_ratios.values())
             portfolio_with_max_sharpe = max(sharpe_ratios, key=sharpe_ratios.get)

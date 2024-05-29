@@ -88,8 +88,8 @@ def run_excel(J:int, K:int, n:int, m:int, risk_free_rate:float, ponderation_meth
         fig_1.show()
         fig_2 = charts.cumulative_viewer(portfolio_keys=None)
         fig_2.show()
-        print(charts.get_table()) 
-    
+        print(charts.get_table())
+        # charts.get_table().to_excel(f'output RFR {risk_free_rate}.xlsx')     
     return full_results
 
 

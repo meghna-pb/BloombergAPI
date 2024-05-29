@@ -10,7 +10,7 @@ VOLUME, PX_LAST, RETURNS, VOLATILITY, RFR, WEIGHT, WEIGHTED_RETURNS = "PX_VOLUME
 parquetTempFilePath = "Data/parquet/"
 
 class Data:
-    def __init__(self, path="", J=3, risk_free_rate:float=0.2, index_ticker = 'RIY Index', 
+    def __init__(self, path="", J=3, risk_free_rate:float=0.02, index_ticker = 'RIY Index', 
                  start_date = datetime(2024, 1, 28), end_date = datetime.now()) -> None:
         """
         Initialize the Data class with the option to load data from a specified path or use predefined Bloomberg data.
@@ -22,7 +22,7 @@ class Data:
 
         self.J = J  
         self.risk_free_rate = risk_free_rate
-        
+
         if path == "":
             from bloomberg import fetch_bloomberg_data
             dict_data, df_compo = fetch_bloomberg_data(start_date, end_date, index_ticker)

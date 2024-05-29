@@ -7,7 +7,7 @@ from performance import Performance, RETURNS
 class Charts(Performance):
     """This class is designed to generate visual representations of portfolio performance metrics."""
     
-    def __init__(self, portfolios:dict, bench:pd.DataFrame, risk_free_rate:float=0.2, confidence_level:float=0.05):
+    def __init__(self, portfolios:dict, bench:pd.DataFrame, risk_free_rate:float=0.02, confidence_level:float=0.05):
         """
         Initialize the Charts class which inherits from the Performance class. 
         
@@ -16,7 +16,7 @@ class Charts(Performance):
         :param risk_free_rate: The risk-free rate to be used in financial calculations such as the Sharpe Ratio. The default value is 0.2.
         :param confidence_level: The confidence level for calculating the Value at Risk (VaR). The default value is 0.05, which corresponds to 95% confidence.
         """
-        super().__init__(portfolios, bench)
+        super().__init__(portfolios, bench, risk_free_rate, confidence_level)
         
     def viewer(self, portfolio_keys: Union[str, List[str]] = None):
         """

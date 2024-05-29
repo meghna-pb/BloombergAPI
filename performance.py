@@ -8,7 +8,7 @@ SHARPE_RATIO = "SHARPE_RATIO"
 class Performance: 
     """This class provides methods to calculate various performance metrics for the given portfolios, including Sharpe Ratio, Value at Risk, and tracking error relative to a specified benchmark. """
     
-    def __init__(self, portfolios:dict, bench:pd.DataFrame, risk_free_rate:float=0.2, confidence_level:float=0.05):
+    def __init__(self, portfolios:dict, bench:pd.DataFrame, risk_free_rate:float=0.02, confidence_level:float=0.05):
         """
         Initialize the Performance class with portfolio data and additional parameters for performance evaluation.
         
