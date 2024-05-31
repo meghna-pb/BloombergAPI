@@ -32,7 +32,7 @@ class Signal:
         """
         dict_returns, dict_volume = {}, {}
         for date, date_data in self.data.items():    
-            dated_data = date_data.dropna() # subset=[PX_LAST, VOLUME], how="all"  
+            dated_data = date_data.dropna()  
             dict_returns[date], dict_volume[date] = self.__create_dated_portfolio(dated_data)
         
         self.simple_returns_portfolios = dict_returns
@@ -47,8 +47,8 @@ class Signal:
         :return: Tuple of dictionaries for returns-based and volume-based portfolios.
         """
         returns_ptf, volume_ptf = {}, {}
-        sorted_by_returns = dated_data.sort_values(by=RETURNS, ascending=False)
-        sorted_by_volume = dated_data.sort_values(by=VOLUME, ascending=False)
+        sorted_by_returns = dated_data.sort_values(by=RETURNS) 
+        sorted_by_volume = dated_data.sort_values(by=VOLUME) 
 
         for i in range(self.n):
             portfolio = sorted_by_returns.iloc[i * len(sorted_by_returns) // self.n:(i + 1) * len(sorted_by_returns) // self.n]

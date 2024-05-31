@@ -81,7 +81,7 @@ def run_excel(J:int, K:int, n:int, m:int, risk_free_rate:float, ponderation_meth
         export_to_excel(intersected_portfolios=intersection, filename=filename)
         
     full_results = optim.get_full_results(intersection)
-
+    
     if outputs : 
         charts = Charts(portfolios=full_results, bench=bench, risk_free_rate=rfr, confidence_level=0.05)
         fig_1 = charts.viewer(portfolio_keys=None)
@@ -89,7 +89,7 @@ def run_excel(J:int, K:int, n:int, m:int, risk_free_rate:float, ponderation_meth
         fig_2 = charts.cumulative_viewer(portfolio_keys=None)
         fig_2.show()
         print(charts.get_table())
-        # charts.get_table().to_excel(f'output RFR {risk_free_rate}.xlsx')     
+        # charts.get_table().to_excel(f'output.xlsx')     
     return full_results
 
 

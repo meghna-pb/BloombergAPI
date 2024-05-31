@@ -83,6 +83,7 @@ class Charts(Performance):
         results_df = pd.DataFrame({
             "Overall Performance": self.overall_performance(),
             "Annualized Performance": self.annualized_performance(),
+            "Average Return": self.average_performance(), 
             "Monthly Volatility": self.monthly_volatility(),
             "Annualized Volatility": self.annualized_volatility(),
             "Maximum Drawdown": self.max_drawdown(),

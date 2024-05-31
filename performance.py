@@ -77,6 +77,17 @@ class Performance:
             dict_results[key] = round(((1 + overall_return)**(252 / num_periods) - 1), 2)
         return dict_results
     
+    def average_performance(self) -> dict:
+        """
+        Calculate the monthly average performance for each portfolio based on the total compounded return and the number of periods.
+        
+        :return: A dictionary with the average returns for each portfolio.
+        """
+        dict_results = {}
+        for key, data in self.portfolios.items():
+            dict_results[key] = round(1 + data[RETURNS].mean(), 2)
+        return dict_results
+    
     def monthly_volatility(self)-> dict:   
         """
         Calculate the standard deviation of monthly returns for each portfolio.
