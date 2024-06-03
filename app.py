@@ -10,11 +10,11 @@ ind_choice = st.selectbox('Select the index on which to apply the strategy',
              ['RIY Index', 'Other'])
 risk_free_rate = st.slider('Choose the risk free rate', min_value=0.01, value=0.02, max_value=1.0)
 col1, col2 = st.columns(2)
-J = col1.number_input('Choose the period of returns (in months) ', min_value=2, step = 1,value =3)
-K =  col2.number_input('Choose the holding period (in months)', min_value=2, step = 1, value =3)
+J = col1.number_input('Choose the period of returns (in months) ', min_value=2, step = 1,value =4)
+K =  col2.number_input('Choose the holding period (in months)', min_value=2, step = 1, value =12)
 col3, col4 = st.columns(2)
-n =  col3.number_input('Choose the number of returns portfolios', min_value=1, step = 1, value = 7)
-m = col4.number_input('Choose the number of volume portfolios ', min_value=1, step = 1, value = 5)
+n =  col3.number_input('Choose the number of returns portfolios', min_value=1, step = 1, value = 10)
+m = col4.number_input('Choose the number of volume portfolios ', min_value=1, step = 1, value = 3)
 
 if ind_choice != 'RIY Index':
     ind_ticker = st.text_input('Input the ticker', value="SPX Index")
