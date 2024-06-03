@@ -38,8 +38,10 @@ else:
         data = Data(path="Data", J=J, risk_free_rate=risk_free_rate) 
 
 pond_choice = st.selectbox('Choose the weighting scheme for the strategy', 
-             ['Equi-weighted', '1/Volatility', 'Volume', 'Volume x price', "Best weighting method"])
-dict_pond = {'Equi-weighted':'equi', '1/Volatility':'vol', 'Volume':'volume', 'Volume x price':'volumexprice', "Best":"best"}
+             ['Equi-weighted', '1/Volatility', 'Volume', 'Volume x price', 
+             # "Best weighting method"
+              ])
+dict_pond = {'Equi-weighted':'equi', '1/Volatility':'vol', 'Volume':'volume', 'Volume x price':'volumexprice', "Best weighting method":"best"}
 pond = dict_pond[pond_choice]
 
 col1, col2 = st.columns(2)
